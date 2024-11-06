@@ -198,7 +198,7 @@ jobs:
       - uses: "marvinpinto/action-automatic-releases@latest"
         with:
           repo_token: "${{ secrets.GITHUB_TOKEN }}"
-          automatic_release_tag: "v0.5.0"
+          automatic_release_tag: "v0.5.1"
           prerelease: true
           title: "Development Build"
           files: |
