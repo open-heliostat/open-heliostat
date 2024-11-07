@@ -20,11 +20,6 @@ jobs:
         with:
           fetch-depth: 2
 
-      - uses: salsify/action-detect-and-tag-new-version@v2
-        with:
-          version-command: |
-            cat version.txt
-
       - name: Cache PlatformIO
         uses: actions/cache@v4
         with:
@@ -47,8 +42,6 @@ jobs:
         run: python3 -m pip install platformio cryptography
 
       - name: Build firmware
-        env:
-          VERSION: "0.0.${{ github.event.number }}"
         run: platformio run -e "esp32-s3-super-mini"
 
       - name: Archive
@@ -68,15 +61,24 @@ jobs:
       - name: Checkout repo for CHANGELOG
         uses: actions/checkout@v4
 
+      - name: Tag version
+        id: tagversion
+        uses: salsify/action-detect-and-tag-new-version@v2
+        with:
+          version-command: |
+            cat version.txt
+
       - name: Download artifacts
         uses: actions/download-artifact@v4
         with:
           name: firmware
           path: firmware
       
-      - uses: ncipollo/release-action@v1
+      - uses: softprops/action-gh-release@v2
         with:
-          artifacts: "firmware/*"
+          tag_name: ${{ steps.tagversion.outputs.current-version }}
+          files: |
+            firmware/*
 
       # - uses: "marvinpinto/action-automatic-releases@latest"
       #   with:
