@@ -73,9 +73,13 @@ jobs:
         with:
           name: firmware
           path: firmware
-
-      - uses: "marvinpinto/action-automatic-releases@latest"
+      
+      - uses: ncipollo/release-action@v1
         with:
-          repo_token: "${{ secrets.GITHUB_TOKEN }}"
-          files: |
-            firmware/*
+          artifacts: "firmware/*"
+
+      # - uses: "marvinpinto/action-automatic-releases@latest"
+      #   with:
+      #     repo_token: "${{ secrets.GITHUB_TOKEN }}"
+      #     files: |
+      #       firmware/*
