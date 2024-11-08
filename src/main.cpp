@@ -20,6 +20,7 @@
 #include <GPSService.h>
 #include <EncoderService.h>
 #include <ClosedLoopControllerService.h>
+#include <HeliostatService.h>
 
 #define SERIAL_BAUD_RATE 115200
 
@@ -40,6 +41,13 @@ Encoder encoder2 = Encoder(4, 3, Wire1);
 
 ClosedLoopController closedLoopController1 = {stepper1, encoder1};
 ClosedLoopController closedLoopController2 = {stepper2, encoder2};
+
+HeliostatController heliostatController = {closedLoopController1, closedLoopController2};
+
+HeliostatService heliostatService = HeliostatService(
+    esp32sveltekit.getSocket(),
+    esp32sveltekit.getFS(),
+    heliostatController);
 
 std::vector<TMC5160Controller*> steppers = {&stepper1, &stepper2};
 std::vector<ClosedLoopController*> closedLoopControllers = {&closedLoopController1, &closedLoopController2};
@@ -115,8 +123,10 @@ void setup()
     gpsSettingsService.begin();
     gpsStateService.begin();
 
-    encoderService.begin();
+    // encoderService.begin();
     closedLoopControllerService.begin();
+
+    heliostatService.begin();
 }
 
 unsigned long lastTick = 0;
@@ -129,14 +139,12 @@ void loop()
     if (now - lastTick > 100) {
         lastTick = now;
         gpsStateService.loop();
-        closedLoopControllerService.loop();
+        heliostatService.loop();
         if (WiFi.status() == WL_CONNECTED) {
             lightStateService.updateState(LightState{true, 0, 0.2, 0.1});
         }
         else {
             lightStateService.updateState(LightState{true, 0.2, 0.1, 0});
         }
-        // if (encoder1.update()) Serial.println(encoder1.angle);
-        // if (encoder2.update()) Serial.println(encoder2.angle);
     }
 }
