@@ -25,6 +25,10 @@
 		});
 	});
 
+	onDestroy(() => {
+		socket.off(heliostatControllerStateEvent);
+	});
+
 </script>
 
 {#if heliostatControllerState}
