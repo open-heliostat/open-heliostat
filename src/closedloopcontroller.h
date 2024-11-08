@@ -15,6 +15,9 @@ public:
     double targetAngle;
     double tolerance = 0.1;
     bool hasLimits = false;
+    bool hasCalibration = false;
+    std::vector<int8_t> calibrationOffsets;
+    double calibrationMaxAmplitude = 0.;
     double limitA = 0.;
     double limitB = 360.;
     ClosedLoopController(TMC5160Controller &stepper, Encoder &encoder) : stepper(stepper), encoder(encoder) {}
@@ -40,7 +43,16 @@ public:
         if (abs(toGo) > tolerance && encoder.hasNewData()) stepper.moveR(toGo);
     }
     double getAngle(){
-        return encoder.getAngle();
+        if (hasCalibration) return getCalibratedAngle();
+        else return encoder.getAngle();
+    }
+    double getCalibratedAngle() {
+        double readAngle = encoder.getAngle();
+        double index = readAngle*360./calibrationOffsets.size();
+        double before = calibrationOffsets[floor(index)] * calibrationMaxAmplitude;
+        double after = calibrationOffsets[ceil(index)] * calibrationMaxAmplitude;
+        double offset = after * fmod(index, 1) + before * (1. - fmod(index, 1));
+        return readAngle + offset;
     }
     void run() {
         if (enabled && millis() - lastPoll >= maxPollInterval) {
