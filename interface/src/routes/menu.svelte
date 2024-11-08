@@ -5,6 +5,8 @@
 	import Users from '~icons/tabler/users';
 	import Settings from '~icons/tabler/settings';
 	import Health from '~icons/tabler/stethoscope';
+	import Status from '~icons/tabler/device-heart-monitor';
+	import Logo from '~icons/tabler/brightness-half';
 	import Update from '~icons/tabler/refresh-alert';
 	import WiFi from '~icons/tabler/wifi';
 	import Router from '~icons/tabler/router';
@@ -45,11 +47,16 @@
 
 	let menuItems = [
 		{
-			title: 'Demo App',
-			icon: Control,
-			href: '/demo',
+			title: 'Status',
+			icon: Status,
+			href: '/heliostat',
 			feature: true,
-			
+		},
+		{
+			title: 'Controller',
+			icon: Control,
+			href: '/controller',
+			feature: true,
 		},
 		{
 			title: 'Stepper',
@@ -170,7 +177,8 @@
 		class="rounded-box mb-4 flex items-center hover:scale-[1.02] active:scale-[0.98]"
 		on:click={() => setActiveMenuItem('')}
 	>
-		<img src={logo} alt="Logo" class="h-12 w-12" />
+		<!-- <img src={logo} alt="Logo" class="h-12 w-12" /> -->
+		 <Logo class="h-10 w-10"></Logo>
 		<h1 class="px-4 text-2xl font-bold">{$page.data.appName}</h1>
 	</a>
 	<ul class="menu rounded-box menu-vertical flex-nowrap overflow-y-auto">
