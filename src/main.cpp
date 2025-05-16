@@ -110,6 +110,9 @@ void setup()
 
     // increase httpd stack for HttpJsonRouter
     server.config.stack_size = 8192;
+    server.config.max_resp_headers = 12;
+    server.config.max_open_sockets = 11;
+    server.config.lru_purge_enable = true;
 
     // start ESP32-SvelteKit
     esp32sveltekit.begin();
