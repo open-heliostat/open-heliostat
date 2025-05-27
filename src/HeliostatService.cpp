@@ -3,10 +3,12 @@
 JsonRouter<HeliostatController> HeliostatControllerJsonRouter::router = JsonRouter<HeliostatController>(
 {
     {"azimuth", [&](JsonVariant content, HeliostatController &controller) {
-        return ClosedLoopControllerJsonRouter::router.parse(content, controller.azimuthController);
+        auto* azimuthCtrl = static_cast<ClosedLoopController*>(&controller.azimuthController);
+        return ClosedLoopControllerJsonRouter::router.parse(content, *azimuthCtrl);
     }},
     {"elevation", [&](JsonVariant content, HeliostatController &controller) {
-        return ClosedLoopControllerJsonRouter::router.parse(content, controller.elevationController);
+        auto* elevationCtrl = static_cast<ClosedLoopController*>(&controller.elevationController);
+        return ClosedLoopControllerJsonRouter::router.parse(content, *elevationCtrl);
     }},
     {"sourcesMap", [&](JsonVariant content, HeliostatController &controller) {
         return updateDirectionsMap(content.as<JsonObject>(), controller.targetsMap);
@@ -77,10 +79,16 @@ JsonRouter<HeliostatController> HeliostatControllerJsonRouter::router = JsonRout
         obj["elevation"] = controller.getSolarPosition().elevation;
     }},
     {"azimuth", [&](HeliostatController &controller, JsonVariant content) {
-        if (content.is<JsonObject>()) ClosedLoopControllerJsonRouter::router.serialize(controller.azimuthController, content);
+        if (content.is<JsonObject>()) {
+            auto* azimuthCtrl = static_cast<ClosedLoopController*>(&controller.azimuthController);
+            ClosedLoopControllerJsonRouter::router.serialize(*azimuthCtrl, content);
+        }
     }},
     {"elevation", [&](HeliostatController &controller, JsonVariant content) {
-        if (content.is<JsonObject>()) ClosedLoopControllerJsonRouter::router.serialize(controller.elevationController, content);
+        if (content.is<JsonObject>()) {
+            auto* elevationCtrl = static_cast<ClosedLoopController*>(&controller.elevationController);
+            ClosedLoopControllerJsonRouter::router.serialize(*elevationCtrl, content);
+        }
     }},
 });
 

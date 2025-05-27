@@ -10,7 +10,7 @@ using DirectionsMap = std::map<String, SphericalCoordinate>;
 class HeliostatController
 {
 public:
-    HeliostatController(ClosedLoopController &azimuthController, ClosedLoopController &elevationController, SerialGPS &gps) : 
+    HeliostatController(AbstractController &azimuthController, AbstractController &elevationController, SerialGPS &gps) : 
         azimuthController(azimuthController), elevationController(elevationController), gps(gps) {}
 
     SphericalCoordinate getTarget() 
@@ -148,8 +148,8 @@ public:
         // {"Default Target", {120., 15.}}
     };
 
-    ClosedLoopController &azimuthController;
-    ClosedLoopController &elevationController;
+    AbstractController &azimuthController;
+    AbstractController &elevationController;
 
     unsigned long lastCommand = 0;
     SerialGPS &gps;

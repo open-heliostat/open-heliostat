@@ -4,12 +4,12 @@
 #include <Arduino.h>
 #include <tmcdriver.h>
 #include <encoder.h>
+#include <abstractcontroller.h>
 
-class ClosedLoopController
+class ClosedLoopController : public AbstractController
 {
 public:
     TMC5160Controller &stepper;
-    Encoder &encoder;
     uint32_t maxPollInterval = 50;
     bool enabled;
     double targetAngle;
@@ -26,7 +26,7 @@ public:
     static const int calibrationSteps = 128;
     float calibrationOffsets[calibrationSteps];
     double calibrationStepperStartOffset = 0.;
-    ClosedLoopController(TMC5160Controller &stepper, Encoder &encoder) : stepper(stepper), encoder(encoder) {}
+    ClosedLoopController(TMC5160Controller &stepper, Encoder &encoder) : AbstractController(encoder), stepper(stepper) {}
     double mod(double a, double N) {return a - N*floor(a/N);}
     double angularDistance(double a, double b) {
         return mod(a - b + 180., 360.) - 180.;
