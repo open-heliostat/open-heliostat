@@ -74,6 +74,9 @@ public:
     {
         // return sntp_get_sync_status() == SNTP_SYNC_STATUS_COMPLETED;
         // return timeStatus() == timeSet;
+        time_t now = time(nullptr);
+        struct tm *timeinfo = localtime(&now);
+        return (timeinfo->tm_year > 120); // tm_year is years since 1900, so 120 means year 2020
         return year() > 2020;
     }
 

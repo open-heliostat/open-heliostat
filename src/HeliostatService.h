@@ -27,7 +27,7 @@ public:
         getSaveMap(root, state);
         router.serialize(state, root);
         JsonDocument ref = root;
-        Serial.println(ref.as<String>());
+        // Serial.println(ref.as<String>());
         ref = getSaveMap(state);
         JsonSaveManager::filterFieldsRecursively(ref.as<JsonObject>(), root);
     }

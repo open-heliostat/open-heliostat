@@ -57,6 +57,39 @@
 		return postJsonRest(restPath, heliostatControllerState).then((data)=>heliostatControllerState=data);
 	}
 
+	function syncClientTime() {
+		const now = new Date();
+		postJsonRest(restPath + '/sunTracker', {
+			time: {
+				year: now.getFullYear(),
+				month: now.getMonth() + 1,
+				day: now.getDate(),
+				hour: now.getHours(),
+				minute: now.getMinutes(),
+				second: now.getSeconds()
+			}
+		}).then(() => getHeliostatControllerState());
+	}
+
+	function getBrowserLocation() {
+		if (!navigator.geolocation) {
+			alert("Geolocation is not supported by your browser");
+			return;
+		}
+
+		navigator.geolocation.getCurrentPosition(
+			(position) => {
+				postJsonRest(restPath + '/sunTracker', {
+					latitude: position.coords.latitude,
+					longitude: position.coords.longitude
+				}).then(() => getHeliostatControllerState());
+			},
+			(error) => {
+				alert("Error getting location: " + error.message);
+			}
+		);
+	}
+
 </script>
 
 <SettingsCard collapsible={false}>
@@ -175,9 +208,20 @@
 			onChange={postHeliostatControllerState}
 		></Slider>
 	</GridForm>
-	<Button
-		label="Get from GPS"
-		onClick={()=>{postJsonRest(restPath + '/sunTracker/getFromGPS', {}).then(() => getHeliostatControllerState())}}>
-	</Button>
+	<div class="flex flex-row gap-2">
+		<Button
+			label="Get from GPS"
+			onClick={()=>{postJsonRest(restPath + '/sunTracker/getFromGPS', {}).then(() => getHeliostatControllerState())}}>
+		</Button>
+		<!-- <Button
+			label="Get from Browser"
+			onClick={getBrowserLocation}>
+		</Button> -->
+		<div class="flex-grow"></div>
+		<Button
+			label="Sync Time"
+			onClick={syncClientTime}>
+		</Button>
+	</div>
 	{/await}
 </SettingsCard>

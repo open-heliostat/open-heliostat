@@ -1,4 +1,5 @@
 #include <HeliostatService.h>
+#include <time.h>
 
 JsonRouter<HeliostatController> HeliostatControllerJsonRouter::router = JsonRouter<HeliostatController>(
 {
@@ -61,6 +62,16 @@ JsonRouter<HeliostatController> HeliostatControllerJsonRouter::router = JsonRout
             if (obj["latitude"].is<double>()) controller.latitude = obj["latitude"].as<double>();
             if (obj["longitude"].is<double>()) controller.longitude = obj["longitude"].as<double>();
             if (obj["getFromGPS"].is<JsonVariant>()) controller.getLocationFromGPS();
+            if (obj["time"].is<JsonObject>()) {
+                JsonObject timeObj = obj["time"];
+                setTime(timeObj["year"] | 0,
+                        timeObj["month"] | 1,
+                        timeObj["day"] | 1,
+                        timeObj["hour"] | 0,
+                        timeObj["minute"] | 0,
+                        timeObj["second"] | 0);
+            }
+            
             return true;
         }
         return false;
