@@ -3,12 +3,26 @@
 JsonRouter<HeliostatController> HeliostatControllerJsonRouter::router = JsonRouter<HeliostatController>(
 {
     {"azimuth", [&](JsonVariant content, HeliostatController &controller) {
-        auto* azimuthCtrl = static_cast<ClosedLoopController*>(&controller.azimuthController);
-        return ClosedLoopControllerJsonRouter::router.parse(content, *azimuthCtrl);
+        if (controller.azimuthController.getType() == 1) {
+            auto* azimuthCtrl = static_cast<ClosedLoopController*>(&controller.azimuthController);
+            return ClosedLoopControllerJsonRouter::router.parse(content, *azimuthCtrl);
+        }
+        else if (controller.azimuthController.getType() == 2) {
+            auto* servoCtrl = static_cast<Servo_Driver*>(&controller.azimuthController);
+            return ServoControllerJsonRouter::router.parse(content, *servoCtrl);
+        }
+        return false;
     }},
     {"elevation", [&](JsonVariant content, HeliostatController &controller) {
-        auto* elevationCtrl = static_cast<ClosedLoopController*>(&controller.elevationController);
-        return ClosedLoopControllerJsonRouter::router.parse(content, *elevationCtrl);
+        if (controller.elevationController.getType() == 1) {
+            auto* elevationCtrl = static_cast<ClosedLoopController*>(&controller.elevationController);
+            return ClosedLoopControllerJsonRouter::router.parse(content, *elevationCtrl);
+        }
+        else if (controller.elevationController.getType() == 2) {
+            auto* servoCtrl = static_cast<Servo_Driver*>(&controller.elevationController);
+            return ServoControllerJsonRouter::router.parse(content, *servoCtrl);
+        }
+        return false;
     }},
     {"sourcesMap", [&](JsonVariant content, HeliostatController &controller) {
         return updateDirectionsMap(content.as<JsonObject>(), controller.targetsMap);
@@ -80,14 +94,26 @@ JsonRouter<HeliostatController> HeliostatControllerJsonRouter::router = JsonRout
     }},
     {"azimuth", [&](HeliostatController &controller, JsonVariant content) {
         if (content.is<JsonObject>()) {
-            auto* azimuthCtrl = static_cast<ClosedLoopController*>(&controller.azimuthController);
-            ClosedLoopControllerJsonRouter::router.serialize(*azimuthCtrl, content);
+            if (controller.azimuthController.getType() == 1) {
+                auto* azimuthCtrl = static_cast<ClosedLoopController*>(&controller.azimuthController);
+                ClosedLoopControllerJsonRouter::router.serialize(*azimuthCtrl, content);
+            }
+            else if (controller.azimuthController.getType() == 2) {
+                auto* servoCtrl = static_cast<Servo_Driver*>(&controller.azimuthController);
+                ServoControllerJsonRouter::router.serialize(*servoCtrl, content);
+            }
         }
     }},
     {"elevation", [&](HeliostatController &controller, JsonVariant content) {
         if (content.is<JsonObject>()) {
-            auto* elevationCtrl = static_cast<ClosedLoopController*>(&controller.elevationController);
-            ClosedLoopControllerJsonRouter::router.serialize(*elevationCtrl, content);
+            if (controller.elevationController.getType() == 1) {
+                auto* elevationCtrl = static_cast<ClosedLoopController*>(&controller.elevationController);
+                ClosedLoopControllerJsonRouter::router.serialize(*elevationCtrl, content);
+            }
+            else if (controller.elevationController.getType() == 2) {
+                auto* servoCtrl = static_cast<Servo_Driver*>(&controller.elevationController);
+                ServoControllerJsonRouter::router.serialize(*servoCtrl, content);
+            }
         }
     }},
 });

@@ -5,6 +5,7 @@
 #include <FSPersistence.h>
 #include <StatelessService.h>
 #include <ClosedLoopControllerService.h>
+#include <ServoControllerService.h>
 
 #include <heliostat.h>
 

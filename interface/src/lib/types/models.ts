@@ -233,3 +233,16 @@ export type ControllerState = {
 		decay: number;
 	};
 }
+
+export type DCMotorControlState = {
+    speed: number;
+    duty: number;
+	direction: boolean;
+};
+
+export type DCMotorSettings = {
+	enable: boolean;
+	invertDirection: boolean;
+	minVal: number;
+	shape: number;
+}

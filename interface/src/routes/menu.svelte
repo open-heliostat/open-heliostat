@@ -63,7 +63,13 @@
 			title: 'Steppers',
 			icon: Control,
 			href: '/steppers',
-			feature: true
+			feature: $page.data.features.steppers,
+		},
+		{
+			title: 'Motors',
+			icon: Control,
+			href: '/motors',
+			feature: $page.data.features.motors,
 		},
 		{
 			title: 'Connections',
