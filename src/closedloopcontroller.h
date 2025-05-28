@@ -28,15 +28,7 @@ public:
             run();
         }
     }
-    void setAngle(double angle) {
-        setTarget(angle);
-        calcError();
-        if (enabled && abs(error) > tolerance && encoder.hasNewData()) {
-            stepper.setMaxSpeed();
-            stepper.moveR(error);
-        }
-    }
-    double getAngle(){
+    double getAngle() override {
         if (hasCalibration) return getCalibratedAngle();
         else return mod(encoder.getAngle()+encoderOffset, 360.);
     }

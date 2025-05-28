@@ -47,7 +47,7 @@ public:
         root["enabled"] = true;
         root["invert"] = true;
         root["offset"] = true;
-        root["stepper"] = TMC5160ControllerJsonRouter::getSaveMap();
+        root["motor"] = TMC5160ControllerJsonRouter::getSaveMap();
     }
     static const JsonDocument getSaveMap() 
     {

@@ -24,33 +24,43 @@ public:
     }
     static void readForSave(HeliostatController &state, JsonObject &root)
     {
-        getSaveMap(root);
+        getSaveMap(root, state);
         router.serialize(state, root);
         JsonDocument ref = root;
         Serial.println(ref.as<String>());
-        ref = getSaveMap();
+        ref = getSaveMap(state);
         JsonSaveManager::filterFieldsRecursively(ref.as<JsonObject>(), root);
     }
     static StateUpdateResult update(JsonObject &root, HeliostatController &state)
     {
-        if (router.parse(root, state) && JsonSaveManager::needsToSave(root, getSaveMap())) return StateUpdateResult::CHANGED;
+        if (router.parse(root, state) && JsonSaveManager::needsToSave(root, getSaveMap(state))) return StateUpdateResult::CHANGED;
         else return StateUpdateResult::UNCHANGED;
     }
-    static const void getSaveMap(JsonObject &root)
+    static const void getSaveMap(JsonObject &root, HeliostatController &state)
     {
-        root["elevation"] = ClosedLoopControllerJsonRouter::getSaveMap();
-        root["azimuth"] = ClosedLoopControllerJsonRouter::getSaveMap();
+        if (state.azimuthController.getType() == 2) {
+            root["azimuth"] = ServoControllerJsonRouter::getSaveMap();
+        }
+        else if (state.azimuthController.getType() == 1) {
+            root["azimuth"] = ClosedLoopControllerJsonRouter::getSaveMap();
+        }
+        if (state.elevationController.getType() == 2) {
+            root["elevation"] = ServoControllerJsonRouter::getSaveMap();
+        }
+        else if (state.elevationController.getType() == 1) {
+            root["elevation"] = ClosedLoopControllerJsonRouter::getSaveMap();
+        }
         root["currentTarget"] = true;
         root["currentSource"] = true;
         root["sourcesMap"] = true;
         root["sunTracker"]["latitude"] = true;
         root["sunTracker"]["longitude"] = true;
     }
-    static const JsonDocument getSaveMap()
+    static const JsonDocument getSaveMap(HeliostatController &state)
     {
         JsonDocument doc;
         JsonObject obj = doc.to<JsonObject>();
-        getSaveMap(obj);
+        getSaveMap(obj, state);
         return doc;
     }
     static bool removeFromMap(String target, DirectionsMap &map);

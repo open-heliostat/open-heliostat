@@ -43,7 +43,7 @@
 		max={1.}
 		step={0.01}
 		bind:value={motorControl.speed}
-		onChange={()=>{postMotorControl(motorControl)}}
+		onChange={()=>{postJsonRest(restPath, {speed: motorControl.speed})}}
 	></Slider>
     <!-- <Slider
         label="Duty Cycle"
@@ -68,7 +68,7 @@
 	<div class="flex-grow"></div>
 	<div>
 		<div>
-			<StopButton onClick={() => {motorControl.speed=0; postMotorControl(motorControl);}}></StopButton>
+			<StopButton onClick={() => {motorControl.speed=0; postJsonRest(restPath, {speed: motorControl.speed});}}></StopButton>
 		</div>
 	</div>
 </div>

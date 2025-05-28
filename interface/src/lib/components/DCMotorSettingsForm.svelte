@@ -8,21 +8,11 @@
 	export let restPath : string;
 	let motorSettings : DCMotorSettings;
 
-	let intervalID : any = null;
-	onMount(() => {
-		intervalID = setInterval(() => {
-			getmotorSettings();
-		}, 2000);
-	});
-	onDestroy(() => {
-		clearInterval(intervalID);
-	});
-
 	async function getmotorSettings() {
 		return getJsonRest(restPath, motorSettings).then(data => motorSettings = data);
 	}
 	async function postmotorSettings(control: DCMotorSettings) {
-		return postJsonRest(restPath, control);
+		return postJsonRest(restPath, control).then(data => motorSettings = data);
 	}
 </script>
 
@@ -36,7 +26,7 @@
 <div class="w-full grid grid-flow-row grid-form items-center">
 	<Checkbox
         label="Invert Direction"
-        bind:value={motorSettings.invertDirection}
+        bind:value={motorSettings.invert}
         onChange={()=>{postmotorSettings(motorSettings)}}
     ></Checkbox>
     <Slider

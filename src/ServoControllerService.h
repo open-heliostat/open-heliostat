@@ -47,6 +47,7 @@ public:
         root["limits"]["enabled"] = true;
         root["limits"]["begin"] = true;
         root["limits"]["end"] = true;
+        root["motor"] = MotorDriverJsonRouter::getSaveMap();
     }
     static const JsonDocument getSaveMap() 
     {

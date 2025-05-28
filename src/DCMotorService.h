@@ -35,6 +35,8 @@ public:
     {
         root["config"]["minVal"] = true;
         root["config"]["shape"] = true;
+        root["config"]["enable"] = true;
+        root["config"]["invert"] = true;
     }
     static const JsonDocument getSaveMap() 
     {

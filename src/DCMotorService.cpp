@@ -19,6 +19,7 @@ JsonRouter<Motor_Driver> MotorDriverJsonRouter::router = JsonRouter<Motor_Driver
         target["minVal"] = controller.getMin();
         target["shape"] = controller.shape;
         target["enable"] = controller.isRunning;
+        target["invert"] = controller.invert;
     }}
 });
 
@@ -44,13 +45,6 @@ JsonEventRouter<Motor_Driver> MotorDriverJsonRouter::controlRouter = JsonEventRo
         }
         else return false;
     }},
-    {"enable", [](JsonVariant content, Motor_Driver &controller) {
-        if (content.is<bool>()) {
-            controller.isRunning = content.as<bool>();
-            return true;
-        }
-        else return false;
-    }},
 });
 
 JsonEventRouter<Motor_Driver> MotorDriverJsonRouter::configRouter = JsonEventRouter<Motor_Driver>({
@@ -64,6 +58,20 @@ JsonEventRouter<Motor_Driver> MotorDriverJsonRouter::configRouter = JsonEventRou
     {"shape", [](JsonVariant content, Motor_Driver &controller) {
         if (content.is<double>()) {
             controller.shape = content.as<double>();
+            return true;
+        }
+        else return false;
+    }},
+    {"enable", [](JsonVariant content, Motor_Driver &controller) {
+        if (content.is<bool>()) {
+            controller.isRunning = content.as<bool>();
+            return true;
+        }
+        else return false;
+    }},
+    {"invert", [](JsonVariant content, Motor_Driver &controller) {
+        if (content.is<bool>()) {
+            controller.invert = content.as<bool>();
             return true;
         }
         else return false;

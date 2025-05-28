@@ -212,7 +212,7 @@ export type MultiStepperControl = {
 	steppers: StepperControl[];
 };
 
-export type ControllerState = {
+export type BaseControllerState = {
 	position: number;
 	target: number;
 	tolerance: number;
@@ -225,7 +225,7 @@ export type ControllerState = {
 		begin: number;
 		end: number;
 	};
-	calibration: {
+	calibration?: {
 		enabled: boolean;
 		running: boolean;
 		steps: number;
@@ -233,6 +233,18 @@ export type ControllerState = {
 		decay: number;
 	};
 }
+
+export type ServoControllerState = BaseControllerState & {
+	P: number;
+	I: number;
+	D: number;
+	S: number;
+	curGain: number;
+	derivative: number;
+	integral: number;
+}
+
+export type ControllerState = BaseControllerState | ServoControllerState;
 
 export type DCMotorControlState = {
     speed: number;
@@ -242,7 +254,7 @@ export type DCMotorControlState = {
 
 export type DCMotorSettings = {
 	enable: boolean;
-	invertDirection: boolean;
+	invert: boolean;
 	minVal: number;
 	shape: number;
 }

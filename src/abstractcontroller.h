@@ -10,7 +10,6 @@ public:
     // Core control methods
     virtual void run() = 0;
     virtual void init() = 0;
-    virtual double getAngle() = 0;
     virtual void setAngle(double angle) = 0;
     virtual uint8_t getType() const { return 0; }
     
@@ -31,34 +30,41 @@ public:
     double lerp(double a, double b, double t) {
         return b * t + a * (1. - t);
     }
+    double calcMiddle() {
+        double middle = (mod(limitA, 360.) + mod(limitB, 360.)) * 0.5;
+        if (limitB < limitA) {
+            middle = mod(middle + 180., 360.);
+        }
+        return middle;
+    }
+    double calcInterval() {
+        double interval = mod(limitB - limitA, 360.);
+        return interval;
+    }
     double getTarget() {
         return targetAngle;
     }
     void setTarget(double angle) {
         if (hasLimits) {
-            double middle = mod((limitA + limitB) * 0.5, 360.);
-            double interval = limitB - limitA;
-            if (limitB < limitA) {
-                middle = mod(middle + 180., 360.);
-                interval = mod(interval, 360.);
-            }
-            double t = mod(targetAngle - middle + 180., 360.) - 180.;
+            double middle = calcMiddle();
+            double interval = calcInterval();
+            // double t = mod(targetAngle - middle + 180., 360.) - 180.;
+            double t = angularDistance(angle, middle);
             targetAngle = mod(max(min(t, interval*0.5), -interval*0.5) + middle, 360.);
         }
         else targetAngle = angle;
     }
+    virtual double getAngle(){
+        return mod(encoder.getAngle()+encoderOffset, 360.);
+    }
     void calcError() {
         double curAngle = getAngle();
         if (hasLimits) {
-            double middle = mod((limitA + limitB) * 0.5, 360.);
-            double interval = limitB - limitA;
-            if (limitB < limitA) {
-                middle = mod(middle + 180., 360.);
-                interval = mod(interval, 360.);
-            }
+            double middle = calcMiddle();
+            double interval = calcInterval();
             error = mod(targetAngle - middle + 180., 360.) - mod(curAngle - middle + 180., 360.);
         }
-        else error = mod(targetAngle - curAngle + 180., 360.) - 180.;
+        else error = angularDistance(targetAngle, curAngle);
     }
     void setEncoderOffset(double offset) {
         double offsetDiff = offset - encoderOffset;
