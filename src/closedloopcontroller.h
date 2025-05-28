@@ -5,62 +5,40 @@
 #include <tmcdriver.h>
 #include <encoder.h>
 #include <abstractcontroller.h>
+#include <ClosedLoopControllerService.h>
 
 class ClosedLoopController : public AbstractController
 {
 public:
     TMC5160Controller &stepper;
     uint32_t maxPollInterval = 50;
-    bool enabled;
-    double targetAngle;
-    double tolerance = 0.1;
-    double encoderOffset = 0.;
-    double error;
-    double limitA = 0.;
-    double limitB = 360.;
     double calibrationDecay = 0.1;
     int calibrationSpeed = 5;
-    bool hasLimits = false;
     bool hasCalibration = false;
     bool calibrationRunning = false;
     static const int calibrationSteps = 128;
     float calibrationOffsets[calibrationSteps];
     double calibrationStepperStartOffset = 0.;
     ClosedLoopController(TMC5160Controller &stepper, Encoder &encoder) : AbstractController(encoder), stepper(stepper) {}
-    double mod(double a, double N) {return a - N*floor(a/N);}
-    double angularDistance(double a, double b) {
-        return mod(a - b + 180., 360.) - 180.;
+    uint8_t getType() const override { return 1; }
+    void init() {
+        getAngle();
+        if (encoder.hasNewData()) {
+            targetAngle =  getAngle();
+            run();
+        }
     }
     void setAngle(double angle) {
-        targetAngle = angle;
-        double curAngle = getAngle();
-        if (encoder.hasNewData()) {
-            if (hasLimits) {
-                double middle = mod((limitA + limitB) * 0.5, 360.);
-                double interval = limitB - limitA;
-                if (limitB < limitA) {
-                    middle = mod(middle + 180., 360.);
-                    interval = mod(interval, 360.);
-                }
-                double t = mod(targetAngle - middle + 180., 360.) - 180.;
-                targetAngle = mod(max(min(t, interval*0.5), -interval*0.5) + middle, 360.);
-                error = mod(targetAngle - middle + 180., 360.) - mod(curAngle - middle + 180., 360.);
-                // ESP_LOGI("Controller", "Middle : %f`, Interval: %f, t: %f, Target: %f, To Go: %f\n", middle, interval, t, targetAngle, error);
-            }
-            else error = mod(targetAngle - curAngle + 180., 360.) - 180.;
-            // ESP_LOGI("Controller", "Command : %f, Target: %f, Current: %f, To Go: %f\n", angle, targetAngle, curAngle, error);
-            if (abs(error) > tolerance && enabled) {
-                stepper.setMaxSpeed();
-                stepper.moveR(error);
-            }
+        setTarget(angle);
+        calcError();
+        if (enabled && abs(error) > tolerance && encoder.hasNewData()) {
+            stepper.setMaxSpeed();
+            stepper.moveR(error);
         }
     }
     double getAngle(){
         if (hasCalibration) return getCalibratedAngle();
         else return mod(encoder.getAngle()+encoderOffset, 360.);
-    }
-    double lerp(double a, double b, double t) {
-        return b * t + a * (1. - t);
     }
     void run() {
         if (calibrationRunning) runCalibration();
@@ -91,12 +69,6 @@ public:
     void setCalibrationSpeed(int speed) {
         calibrationSpeed = speed;
         if (calibrationRunning) stepper.setSpeed(calibrationSpeed);
-    }
-    void setEncoderOffset(double offset) {
-        double offsetDiff = offset - encoderOffset;
-        encoderOffset = offset;
-        limitA = mod(limitA + offsetDiff, 360.);
-        limitB = mod(limitB + offsetDiff, 360.);
     }
 private:
     double getCalibratedAngle() {

@@ -15,7 +15,7 @@ public:
 
     SphericalCoordinate getTarget() 
     {
-        return SphericalCoordinate{azimuthController.targetAngle, elevationController.targetAngle};
+        return SphericalCoordinate{azimuthController.getTarget(), elevationController.getTarget()};
     }
 
     SphericalCoordinate getPosition() 
@@ -66,16 +66,8 @@ public:
     void init() 
     {
         setupSolarTracker();
-        azimuthController.getAngle();
-        if (azimuthController.encoder.hasNewData()) {
-            azimuthController.targetAngle =  azimuthController.getAngle();
-            azimuthController.run();
-        }
-        elevationController.getAngle();
-        if (elevationController.encoder.hasNewData()) {
-            elevationController.targetAngle =  elevationController.getAngle();
-            elevationController.run();
-        }
+        azimuthController.init();
+        elevationController.init();
     }
 
     bool isTimeSet() 
