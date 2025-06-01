@@ -22,7 +22,7 @@
 
 PsychicHttpServer server;
 
-ESP32SvelteKit esp32sveltekit(&server, 120);
+ESP32SvelteKit esp32sveltekit(&server, 200);
 Motor_Driver motor1 = {MOT1A, MOT1B, MOT1C, 0};
 Motor_Driver motor2 = {MOT2A, MOT2B, MOT2C, 2};
 
