@@ -7,7 +7,7 @@
     import Spinner from './Spinner.svelte';
     import Terminal from '~icons/tabler/terminal';
     import Select from './Select.svelte';
-	import type { SpinRemote } from '$lib/types/models';
+	import type { Remote } from '$lib/types/models';
 	import Checkbox from './Checkbox.svelte';
 	import Slider from './Slider.svelte';
 	import Collapsible from './Collapsible.svelte';
@@ -24,7 +24,7 @@
 
     let message: string = '';
     let targetAddress: string = '';
-    let remotes: SpinRemote[] = [];
+    let remotes: Remote[] = [];
     let remoteAddresses: { label: string; value: string }[] = [];
 
     async function getRemotes() {

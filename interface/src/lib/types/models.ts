@@ -258,3 +258,11 @@ export type DCMotorSettings = {
 	minVal: number;
 	shape: number;
 }
+export interface Remote {
+    hostname: string;
+    ip: string;
+    rxId: number;
+	macAddress: string;
+	version?: string;
+    needsUpdate?: boolean;
+}
