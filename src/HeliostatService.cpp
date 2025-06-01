@@ -137,7 +137,7 @@ void HeliostatControllerJsonRouter::readDirectionsMap(DirectionsMap map, JsonObj
         JsonObject obj = object[dir.first].to<JsonObject>();
         obj["elevation"] = dir.second.elevation;
         obj["azimuth"] = dir.second.azimuth;
-        ESP_LOGI("Read Map", "%s", dir.first);
+        // ESP_LOGI("Read Map", "%s", dir.first);
     }
 }
 
@@ -154,7 +154,7 @@ bool HeliostatControllerJsonRouter::updateDirectionsMap(JsonVariant content, Dir
                 ESP_LOGI("Update Map", "%s", kv.key().c_str());
             }
             else map.insert({kv.key().c_str(), {obj["azimuth"] | 120., obj["elevation"] | 45.}});
-            ESP_LOGI("Update Map", "%s", kv.key().c_str());
+            // ESP_LOGI("Update Map", "%s", kv.key().c_str());
             updated = true;
         }
     }
