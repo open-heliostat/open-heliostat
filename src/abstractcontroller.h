@@ -52,7 +52,7 @@ public:
             double t = angularDistance(angle, middle);
             targetAngle = mod(max(min(t, interval*0.5), -interval*0.5) + middle, 360.);
         }
-        else targetAngle = angle;
+        else targetAngle = mod(angle, 360.);
     }
     virtual double getAngle(){
         return mod(encoder.getAngle()+encoderOffset, 360.);
