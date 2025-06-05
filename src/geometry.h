@@ -1,7 +1,6 @@
 #ifndef GEOMHELPERS
 #define GEOMHELPERS
 #include <math.h>
-#include <Arduino.h>
 const double pi = 3.14159265359;
 template<typename T>
 T degToRad(T deg){
@@ -184,9 +183,9 @@ struct ObjectDirection : vec2 {
     }
     ObjectDirection bisect(ObjectDirection &obj) {
         vec3 res = this->toCartesian() + obj.toCartesian();
-        ESP_LOGI("Geometry", "%f %f %f", this->toCartesian().x, this->toCartesian().y, this->toCartesian().z);
-        ESP_LOGI("Geometry", "%f %f %f", obj.toCartesian().x, obj.toCartesian().y, obj.toCartesian().z);
-        ESP_LOGI("Geometry", "%f %f %f", res.x, res.y, res.z);
+        // ESP_LOGI("Geometry", "%f %f %f", this->toCartesian().x, this->toCartesian().y, this->toCartesian().z);
+        // ESP_LOGI("Geometry", "%f %f %f", obj.toCartesian().x, obj.toCartesian().y, obj.toCartesian().z);
+        // ESP_LOGI("Geometry", "%f %f %f", res.x, res.y, res.z);
         return ObjectDirection(res.toSpherical());
     }
     void setElevation(double elevation) {

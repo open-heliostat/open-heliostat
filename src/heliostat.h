@@ -37,10 +37,10 @@ public:
 
     SphericalCoordinate reflect(SphericalCoordinate source, SphericalCoordinate target) 
     {
-        vec3 bisector = toCartesian({source.azimuth, source.elevation}) + toCartesian({target.azimuth, target.elevation});
+        vec3 bisector = (toCartesian({source.elevation, source.azimuth}) + toCartesian({target.elevation, target.azimuth})) / 2.0;
         vec2 result = toSpherical(bisector);
         // ESP_LOGI("Reflector", "%f %f", result.x, result.y);
-        return {result.x, result.y};
+        return {result.y, result.x};
     }
 
     void reflectCurrentSource() {
