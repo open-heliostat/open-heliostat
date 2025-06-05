@@ -52,6 +52,10 @@ public:
         }
         root["currentTarget"] = true;
         root["currentSource"] = true;
+        root["add"] = true;
+        root["remove"] = true;
+        root["rename"] = true;
+        root["set"] = true;
         root["sourcesMap"] = true;
         root["sunTracker"]["latitude"] = true;
         root["sunTracker"]["longitude"] = true;
