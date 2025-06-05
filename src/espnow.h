@@ -5,7 +5,8 @@
 #include <esp_wifi.h>
 #include <esp_now.h>
 #include <map>
-#include "jseq.h"
+#include <vector>
+// #include "jseq.h"
 
 struct ESPNowEvent {
     const char *value;
