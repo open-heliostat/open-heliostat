@@ -1,9 +1,9 @@
 #define DEVKITC
 
 #ifdef DEVKITC
-#define MOT1A 4
-#define MOT1B 16
-#define MOT1C 17
+#define MOT1A 16
+#define MOT1B 17
+#define MOT1C 5
 #define MOT2A 22
 #define MOT2B 21
 #define MOT2C 19
