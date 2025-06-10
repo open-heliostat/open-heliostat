@@ -21,6 +21,7 @@
         offset: 0,
         enabled: false,
         invert: false,
+        plot: false,
         encoderError: false,
         P: 10,
         I: 0,
@@ -145,6 +146,11 @@
                         step={0.01}
                         onChange={postControllerState}
                     ></Slider>
+                    <Checkbox 
+                        label="Plot" 
+                        bind:value={controllerState.plot}
+                        onChange={postControllerState}
+                    ></Checkbox>
                 </GridForm>
                 <span class="text-lg">Limits</span>
                 <GridForm>

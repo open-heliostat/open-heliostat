@@ -84,6 +84,14 @@ JsonRouter<Servo_Driver> ServoControllerJsonRouter::router = JsonRouter<Servo_Dr
     {"motor", [](JsonVariant content, Servo_Driver &controller) {
         return MotorDriverJsonRouter::router.parse(content, controller.motor);
     }},
+    {"plot", [](JsonVariant content, Servo_Driver &controller) {
+        if (content.is<bool>()) {
+            controller.plot = content.as<bool>();
+            return true;
+        }
+        else return false;
+    }},
+
 },
 {
     {"position", [](Servo_Driver &controller, const JsonVariant target) {
@@ -135,6 +143,9 @@ JsonRouter<Servo_Driver> ServoControllerJsonRouter::router = JsonRouter<Servo_Dr
     }},
     {"motor", [](Servo_Driver &controller, const JsonVariant target) {
         MotorDriverJsonRouter::router.serialize(controller.motor, target);
+    }},
+    {"plot", [](Servo_Driver &controller, const JsonVariant target) {
+        target.set(controller.plot);
     }},
 });
 

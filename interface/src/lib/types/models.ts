@@ -242,6 +242,7 @@ export type ServoControllerState = BaseControllerState & {
 	curGain: number;
 	derivative: number;
 	integral: number;
+	plot: boolean;
 }
 
 export type ControllerState = BaseControllerState | ServoControllerState;

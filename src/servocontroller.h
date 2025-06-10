@@ -4,10 +4,12 @@
 #include "dcmotor.h"
 #include "encoder.h"
 #include <abstractcontroller.h>
+#include "teleplot.h"
 
 struct Servo_Driver : public AbstractController
 {
     Motor_Driver &motor;
+    bool plot = false;
     double derivative = 0;
     double P = 10;
     double I = 0;
@@ -25,6 +27,7 @@ struct Servo_Driver : public AbstractController
             double curAngle = getAngle();
             calcError();
             double p = double(error)/10. * P;
+
             // if (abs(p) < 0.25) integral += double(error)/1000.;
             // else integral = 0.;
             // integral = min(max(integral+error, -P), P);
@@ -33,13 +36,21 @@ struct Servo_Driver : public AbstractController
             // double speed = lastDestination - destination;
             // lastDestination = destination;
             double result = p + integral * I + derivative * D;// + speed * S;
-            curGain = min(max(result, -1.), 1.);// * 0.1 + curGain * 0.9;
+            curGain = min(max(result, -1.), 1.);
+            
+            if (plot) {
+                TELEPLOT_SEND("angle", curAngle);
+                TELEPLOT_SEND("target", targetAngle);
+                TELEPLOT_SEND("error", error);
+                TELEPLOT_SEND("p_term", p);
+                TELEPLOT_SEND("output", curGain);
+            }
+            
             if (abs(error) < tolerance) {
                 curGain = 0;
                 integral = 0;
             }
             motor.setSpeed(curGain);
-            // Serial.println(sensorValue);
             lastError = error;
         }
     }
