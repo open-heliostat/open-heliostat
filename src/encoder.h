@@ -12,6 +12,7 @@ public:
     bool error = false;
     Encoder(int SDA = SDA, int SCL = SCL, TwoWire &I2C_ = Wire) : I2C(I2C_) {
         I2C.begin(SDA, SCL);
+        I2C.setTimeOut(50);
         // I2C.setClock(50000);
     }
     double getAngle() {
@@ -42,10 +43,9 @@ public:
         return newData;
     }
     int readEncoder() {
-        int available = I2C.requestFrom(0x06, 3);
-        if (available > 2) {
+        I2C.beginTransmission(0x06);  
+        if (I2C.endTransmission() == 0 && I2C.requestFrom(0x06, 3) > 2) {
             byte buff[3];
-            I2C.beginTransmission(0x06);  
             I2C.write(0x02);  // set register for read
             I2C.endTransmission();
             I2C.readBytes(buff, 3);

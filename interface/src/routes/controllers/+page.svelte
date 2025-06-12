@@ -1,9 +1,7 @@
 <script lang="ts">
 	import ControllerRestComp from '$lib/components/ControllerRestComp.svelte';
 	import ServoControllerRestComp from '$lib/components/ServoControllerRestComp.svelte';
-import type { PageData } from '../$types';
-	import Controllers from './Controllers.svelte';
-
+	import type { PageData } from '../$types';
 	export let data: PageData;
 </script>
 
