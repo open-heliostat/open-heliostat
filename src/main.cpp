@@ -55,6 +55,8 @@ GPSStateService gpsStateService =  GPSStateService(
     &gpsneo,
     esp32sveltekit.getFeatureService());
 
+WiFiUDP teleplotUDP;
+
 void setup()
 {
     // start serial and filesystem
