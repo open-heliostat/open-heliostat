@@ -10,18 +10,18 @@ const config: UserConfig = {
 			compiler: 'svelte'
 		}),
 		// Shorten file names for LittleFS 32 char limit
-		viteLittleFS()
+		// viteLittleFS()
 	],
 	server: {
 		proxy: {
 			// Proxying REST: http://localhost:5173/rest/bar -> http://192.168.1.83/rest/bar
 			'/rest': {
-				target: 'http://172.20.10.8',
+				target: 'http://192.168.4.1',
 				changeOrigin: true
 			},
 			// Proxying websockets ws://localhost:5173/ws -> ws://192.168.1.83/ws
 			'/ws': {
-				target: 'ws://172.20.10.8',
+				target: 'ws://192.168.4.1',
 				changeOrigin: true,
 				ws: true
 			}
