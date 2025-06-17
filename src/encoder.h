@@ -45,6 +45,7 @@ public:
     int readEncoder() {
         I2C.beginTransmission(0x06);  
         if (I2C.endTransmission() == 0 && I2C.requestFrom(0x06, 3) > 2) {
+            I2C.beginTransmission(0x06);
             byte buff[3];
             I2C.write(0x02);  // set register for read
             I2C.endTransmission();
