@@ -6,6 +6,8 @@
 
 #include <TinyGPS++.h>
 #include "TimeLib.h"
+#include <time.h>
+#include <sys/time.h>
 
 struct GeoCoords {
     double longitude;
@@ -49,7 +51,22 @@ public:
             if (gps.time.isValid()) {
                 sprintf(timeStr, "%i:%i:%i", gps.time.hour(), gps.time.minute(), gps.time.second());
                 sprintf(dateStr, "%i/%i/%i", gps.date.day(), gps.date.month(), gps.date.year());
+                
+                // Update TimeLib time
                 setTime(gps.time.hour(), gps.time.minute(), gps.time.second(), gps.date.day(), gps.date.month(), gps.date.year());
+                
+                // Also update system time so NTP and GPS time stay in sync
+                struct tm timeinfo = {0};
+                timeinfo.tm_year = gps.date.year() - 1900;  // tm_year is years since 1900
+                timeinfo.tm_mon = gps.date.month() - 1;     // tm_mon is 0-11
+                timeinfo.tm_mday = gps.date.day();
+                timeinfo.tm_hour = gps.time.hour();
+                timeinfo.tm_min = gps.time.minute();
+                timeinfo.tm_sec = gps.time.second();
+                time_t gpsTime = mktime(&timeinfo);
+                struct timeval tv = {.tv_sec = gpsTime, .tv_usec = 0};
+                settimeofday(&tv, nullptr);
+                
                 // updated = true;
             }
             if (gps.location.isUpdated()) {

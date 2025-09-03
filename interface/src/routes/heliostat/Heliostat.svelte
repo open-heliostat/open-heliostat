@@ -61,12 +61,12 @@
 		const now = new Date();
 		postJsonRest(restPath + '/sunTracker', {
 			time: {
-				year: now.getFullYear(),
-				month: now.getMonth() + 1,
-				day: now.getDate(),
-				hour: now.getHours(),
-				minute: now.getMinutes(),
-				second: now.getSeconds()
+				year: now.getUTCFullYear(),
+				month: now.getUTCMonth() + 1,
+				day: now.getUTCDate(),
+				hour: now.getUTCHours(),
+				minute: now.getUTCMinutes(),
+				second: now.getUTCSeconds(),
 			}
 		}).then(() => getHeliostatControllerState());
 	}

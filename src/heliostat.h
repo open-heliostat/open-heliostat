@@ -4,6 +4,9 @@
 #include <closedloopcontroller.h>
 #include <sun.h>
 #include <gpsneo.h>
+#include <lwip/apps/sntp.h>
+#include <TimeLib.h>
+#include <time.h>
 
 using DirectionsMap = std::map<String, SphericalCoordinate>;
 
@@ -72,12 +75,14 @@ public:
 
     bool isTimeSet() 
     {
-        // return sntp_get_sync_status() == SNTP_SYNC_STATUS_COMPLETED;
-        // return timeStatus() == timeSet;
-        // time_t now = time(nullptr);
-        // struct tm *timeinfo = localtime(&now);
-        // return (timeinfo->tm_year > 120); // tm_year is years since 1900, so 120 means year 2020
-        return year() > 2020;
+        // Get current Unix timestamp
+        time_t now = time(nullptr);
+        
+        // Check if time is reasonable (after Jan 1, 2020 = 1577836800)
+        // This works regardless of whether time was set by GPS or NTP
+        bool timeValid = now > 1577836800;
+
+        return timeValid;
     }
 
     bool enabled = true;

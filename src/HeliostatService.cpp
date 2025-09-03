@@ -1,5 +1,7 @@
 #include <HeliostatService.h>
 #include "TimeLib.h"
+#include <time.h>
+#include <sys/time.h>
 
 JsonRouter<HeliostatController> HeliostatControllerJsonRouter::router = JsonRouter<HeliostatController>(
 {
@@ -64,13 +66,27 @@ JsonRouter<HeliostatController> HeliostatControllerJsonRouter::router = JsonRout
             if (obj["getFromGPS"].is<JsonVariant>()) controller.getLocationFromGPS();
             if (obj["time"].is<JsonObject>()) {
                 JsonObject timeObj = obj["time"];
-                setTime(timeObj["hour"].as<int>() | 0,
-                        timeObj["minute"].as<int>() | 0,
-                        timeObj["second"].as<int>() | 0,
-                        timeObj["year"].as<int>() | 0,
-                        timeObj["month"].as<int>() | 1,
-                        timeObj["day"].as<int>() | 1
-                        );
+                int year = timeObj["year"].as<int>() | 0;
+                int month = timeObj["month"].as<int>() | 1;
+                int day = timeObj["day"].as<int>() | 1;
+                int hour = timeObj["hour"].as<int>() | 0;
+                int minute = timeObj["minute"].as<int>() | 0;
+                int second = timeObj["second"].as<int>() | 0;
+                
+                // Update TimeLib time
+                setTime(hour, minute, second, year, month, day);
+                
+                // Also update system time so it stays in sync with TimeLib
+                struct tm timeinfo = {0};
+                timeinfo.tm_year = year - 1900;  // tm_year is years since 1900
+                timeinfo.tm_mon = month - 1;     // tm_mon is 0-11
+                timeinfo.tm_mday = day;
+                timeinfo.tm_hour = hour;
+                timeinfo.tm_min = minute;
+                timeinfo.tm_sec = second;
+                time_t manualTime = mktime(&timeinfo);
+                struct timeval tv = {.tv_sec = manualTime, .tv_usec = 0};
+                settimeofday(&tv, nullptr);
             }
             
             return true;
