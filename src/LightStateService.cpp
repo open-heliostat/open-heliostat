@@ -6,7 +6,7 @@
  *   https://github.com/theelims/ESP32-sveltekit
  *
  *   Copyright (C) 2018 - 2023 rjwats
- *   Copyright (C) 2023 - 2025 theelims
+ *   Copyright (C) 2023 - 2024 theelims
  *
  *   All Rights Reserved. This software may be modified and distributed under
  *   the terms of the LGPL v3 license. See the LICENSE file for details.
@@ -15,35 +15,44 @@
 #include <LightStateService.h>
 
 LightStateService::LightStateService(PsychicHttpServer *server,
-                                     ESP32SvelteKit *sveltekit,
-                                     LightMqttSettingsService *lightMqttSettingsService) : _httpEndpoint(LightState::read,
+                                     EventSocket *socket,
+                                     SecurityManager *securityManager,
+                                     PsychicMqttClient *mqttClient,
+                                     LightMqttSettingsService *lightMqttSettingsService,
+                                     FeaturesService *featuresService) :                   _httpEndpoint(LightState::read,
                                                                                                          LightState::update,
                                                                                                          this,
                                                                                                          server,
                                                                                                          LIGHT_SETTINGS_ENDPOINT_PATH,
-                                                                                                         sveltekit->getSecurityManager(),
+                                                                                                         securityManager,
                                                                                                          AuthenticationPredicates::IS_AUTHENTICATED),
                                                                                            _eventEndpoint(LightState::read,
                                                                                                           LightState::update,
                                                                                                           this,
-                                                                                                          sveltekit->getSocket(),
+                                                                                                          socket,
                                                                                                           LIGHT_SETTINGS_EVENT),
                                                                                            _mqttEndpoint(LightState::homeAssistRead,
                                                                                                          LightState::homeAssistUpdate,
                                                                                                          this,
-                                                                                                         sveltekit->getMqttClient()),
+                                                                                                         mqttClient),
                                                                                            _webSocketServer(LightState::read,
                                                                                                             LightState::update,
                                                                                                             this,
                                                                                                             server,
                                                                                                             LIGHT_SETTINGS_SOCKET_PATH,
-                                                                                                            sveltekit->getSecurityManager(),
+                                                                                                            securityManager,
                                                                                                             AuthenticationPredicates::IS_AUTHENTICATED),
-                                                                                           _mqttClient(sveltekit->getMqttClient()),
-                                                                                           _lightMqttSettingsService(lightMqttSettingsService)
+                                                                                           _mqttClient(mqttClient),
+                                                                                           _lightMqttSettingsService(lightMqttSettingsService),
+                                                                                           _featuresService(featuresService)
 {
+#ifdef RGB_BUILTIN
+    _featuresService->addFeature("rgb", true);
+#else
     // configure led to be output
     pinMode(LED_BUILTIN, OUTPUT);
+    _featuresService->addFeature("rgb", false);
+#endif
 
     // configure MQTT callback
     _mqttClient->onConnect(std::bind(&LightStateService::registerConfig, this));
@@ -67,9 +76,21 @@ void LightStateService::begin()
     onConfigUpdated();
 }
 
+void LightStateService::updateState(LightState lightState) {
+    JsonDocument json;
+    JsonObject jsonObject = json.to<JsonObject>();
+    _state.read(lightState, jsonObject);
+    update(jsonObject, _state.update, "driver");
+}
+
 void LightStateService::onConfigUpdated()
 {
+#ifdef RGB_BUILTIN
+    if (_state.ledOn) neopixelWrite(RGB_BUILTIN,_state.red*255.,_state.green*255.,_state.blue*255.);
+    else neopixelWrite(RGB_BUILTIN,0,0,0);
+#else
     digitalWrite(LED_BUILTIN, _state.ledOn ? 1 : 0);
+#endif
 }
 
 void LightStateService::registerConfig()
