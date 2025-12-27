@@ -19,6 +19,9 @@
 	import Metrics from '~icons/tabler/report-analytics';
 	import Bug from '~icons/tabler/bug';
 	import PlugConnected from '~icons/tabler/plug-connected';
+	import GPS from '~icons/tabler/satellite';
+	import Rotation from '~icons/tabler/rotate-dot'
+	import Status from '~icons/tabler/device-heart-monitor';
 	import { page } from '$app/state';
 	import { user } from '$lib/stores/user';
 
@@ -47,10 +50,28 @@
 
 	let menuItems = $state([
 		{
-			title: 'Demo App',
+			title: 'Status',
+			icon: Status,
+			href: '/heliostat',
+			feature: true,
+		},
+		{
+			title: 'Controllers',
+			icon: Rotation,
+			href: '/controllers',
+			feature: true,
+		},
+		{
+			title: 'Steppers',
 			icon: Control,
-			href: '/demo',
-			feature: true
+			href: '/steppers',
+			feature: $page.data.features.steppers,
+		},
+		{
+			title: 'Motors',
+			icon: Control,
+			href: '/motors',
+			feature: $page.data.features.motors,
 		},
 		{
 			title: 'Connections',
@@ -68,6 +89,13 @@
 					icon: NTP,
 					href: '/connections/ntp',
 					feature: page.data.features.ntp
+				},
+				{
+					title: 'GPS',
+					icon: GPS,
+					href: '/connections/gps',
+					feature: $page.data.features.gps,
+					
 				}
 			]
 		},

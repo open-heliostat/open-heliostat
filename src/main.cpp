@@ -122,9 +122,9 @@ void setup()
     // // start the light service
     // lightMqttSettingsService.begin();
 
-    engine.init();
-    stepper1.init();
-    stepper2.init();
+    // engine.init();
+    // stepper1.init();
+    // stepper2.init();
 
     gpsneo.init();
     gpsSettingsService.begin();

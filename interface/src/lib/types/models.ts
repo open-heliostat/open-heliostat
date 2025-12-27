@@ -174,3 +174,110 @@ export type EthernetSettings = {
 	dns_ip_1?: string;
 	dns_ip_2?: string;
 };
+
+
+export type StepperSettings = {
+	name: string;
+	enableOnStart: boolean;
+	invertDirection: boolean;
+	maxSpeed: number;
+	maxAcceleration: number;
+	current: number;
+	stepsPerRot: number;
+};
+
+
+export type MultiStepperSettings = {
+	steppers: StepperSettings[]
+}
+
+export type StepperControl = {
+	isEnabled: boolean;
+	direction: boolean;
+	speed: number;
+	move: number;
+	acceleration: number;
+	status: number;
+	version: number;
+};
+
+export type StepperControlState = {
+	speed: number;
+	move: number;
+	accel: number;
+}
+
+export type StepperConfig = {
+	enabled: boolean;
+	maxSpeed: number;
+	maxAccel: number;
+	invertDirection: boolean;
+	driverCurrent: number;
+	stepsPerRot: number;
+}
+
+export type StepperDiag = {
+	status: number;
+	version: number;
+	isEnabled: boolean;
+}
+
+export type MultiStepperControl = {
+	steppers: StepperControl[];
+};
+
+export type BaseControllerState = {
+	position: number;
+	target: number;
+	tolerance: number;
+	offset: number;
+	enabled: boolean;
+	invert: boolean;
+	encoderError: boolean;
+	limits: {
+		enabled: boolean;
+		begin: number;
+		end: number;
+	};
+	calibration?: {
+		enabled: boolean;
+		running: boolean;
+		steps: number;
+		speed: number;
+		decay: number;
+	};
+}
+
+export type ServoControllerState = BaseControllerState & {
+	P: number;
+	I: number;
+	D: number;
+	S: number;
+	curGain: number;
+	derivative: number;
+	integral: number;
+	plot: boolean;
+}
+
+export type ControllerState = BaseControllerState | ServoControllerState;
+
+export type DCMotorControlState = {
+    speed: number;
+    duty: number;
+	direction: boolean;
+};
+
+export type DCMotorSettings = {
+	enable: boolean;
+	invert: boolean;
+	minVal: number;
+	shape: number;
+}
+export interface Remote {
+    hostname: string;
+    ip: string;
+    rxId: number;
+	macAddress: string;
+	version?: string;
+    needsUpdate?: boolean;
+}
