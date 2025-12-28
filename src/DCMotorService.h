@@ -2,9 +2,13 @@
 #define DCMotorService_h
 
 #include <EventEndpoint.h>
-#include <HttpRouterEndpoint.h>
+#include <lib/HttpStateRouterEndpoint.h>
 #include <FSPersistence.h>
-#include <StatelessService.h>
+#include <lib/JsonStateRouter.h>
+
+using JsonStateRouting::JsonEventRouter;
+using JsonStateRouting::JsonRouter;
+using JsonStateRouting::JsonSaveManager;
 
 #include <dcmotor.h>
 
@@ -65,7 +69,7 @@ public:
     void begin();
 
 private:
-    HttpRouterEndpoint<Motor_Driver&> _httpRouterEndpoint;
+    HttpStateRouterEndpoint<Motor_Driver&> _httpRouterEndpoint;
     FSPersistence<Motor_Driver&> _fsPersistence;
     MotorDriverJsonRouter _router;
 };

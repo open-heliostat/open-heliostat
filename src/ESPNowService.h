@@ -2,10 +2,13 @@
 #define ESPNowService_h
 
 #include <ESP32SvelteKit.h>
-#include <StatelessService.h>
-#include <HttpRouterEndpoint.h>
+#include <lib/JsonStateRouter.h>
+#include <lib/HttpStateRouterEndpoint.h>
 #include <FSPersistence.h>
 #include "espnow.h"
+
+using JsonStateRouting::JsonRouter;
+using JsonStateRouting::JsonSaveManager;
 
 class ESPNowJsonRouter
 {
@@ -80,7 +83,7 @@ public:
     void loop();
 
 private:
-    HttpRouterEndpoint<ESPNowState> _httpRouterEndpoint;
+    HttpStateRouterEndpoint<ESPNowState> _httpRouterEndpoint;
     FSPersistence<ESPNowState> _fsPersistence;
     ESPNowJsonRouter _router;
 };

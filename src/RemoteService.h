@@ -2,10 +2,13 @@
 #define RemoteService_h
 
 #include <ESP32SvelteKit.h>
-#include <StatelessService.h>
-#include <HttpRouterEndpoint.h>
+#include <lib/JsonStateRouter.h>
+#include <lib/HttpStateRouterEndpoint.h>
 #include <FSPersistence.h>
 #include "remotes.h"
+
+using JsonStateRouting::JsonRouter;
+using JsonStateRouting::JsonSaveManager;
 
 class RemoteJsonRouter 
 {
@@ -79,7 +82,7 @@ public:
     void loop();
 
 private:
-    HttpRouterEndpoint<RemotesController&> _httpRouterEndpoint;
+    HttpStateRouterEndpoint<RemotesController&> _httpRouterEndpoint;
     FSPersistence<RemotesController&> _fsPersistence;
     RemoteJsonRouter _router;
 };

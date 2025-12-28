@@ -2,9 +2,13 @@
 #define StepperService_h
 
 #include <EventEndpoint.h>
-#include <HttpRouterEndpoint.h>
+#include <lib/HttpStateRouterEndpoint.h>
 #include <FSPersistence.h>
-#include <StatelessService.h>
+#include <lib/JsonStateRouter.h>
+
+using JsonStateRouting::JsonEventRouter;
+using JsonStateRouting::JsonRouter;
+using JsonStateRouting::JsonSaveManager;
 
 #include <tmcdriver.h>
 
@@ -70,7 +74,7 @@ public:
 
 private:
     EventEndpoint<TMC5160Controller&> _eventEndpoint;
-    HttpRouterEndpoint<TMC5160Controller&> _httpRouterEndpoint;
+    HttpStateRouterEndpoint<TMC5160Controller&> _httpRouterEndpoint;
     FSPersistence<TMC5160Controller&> _fsPersistence;
     TMC5160ControllerJsonRouter _router;
 };

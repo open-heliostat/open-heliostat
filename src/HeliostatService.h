@@ -3,13 +3,17 @@
 
 #include <EventEndpoint.h>
 #include <FSPersistence.h>
-#include <StatelessService.h>
+#include <lib/HttpStateRouterEndpoint.h>
+#include <lib/JsonStateRouter.h>
 #include <ClosedLoopControllerService.h>
 #include <ServoControllerService.h>
 
 #include <heliostat.h>
 
 #include <esp_debug_helpers.h>
+
+using JsonStateRouting::JsonRouter;
+using JsonStateRouting::JsonSaveManager;
 
 class HeliostatControllerJsonRouter
 {
@@ -91,7 +95,7 @@ public:
 
 private:
     EventEndpoint<HeliostatController&> _eventEndpoint;
-    HttpRouterEndpoint<HeliostatController&> _httpRouterEndpoint;
+    HttpStateRouterEndpoint<HeliostatController&> _httpRouterEndpoint;
     FSPersistence<HeliostatController&> _fsPersistence;
     HeliostatControllerJsonRouter _router;
 };

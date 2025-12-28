@@ -3,10 +3,13 @@
 
 #include <EventEndpoint.h>
 #include <FSPersistence.h>
-#include <StatelessService.h>
-#include <HttpRouterEndpoint.h>
+#include <lib/JsonStateRouter.h>
+#include <lib/HttpStateRouterEndpoint.h>
 #include <servocontroller.h>
 #include <DCMotorService.h>
+
+using JsonStateRouting::JsonRouter;
+using JsonStateRouting::JsonSaveManager;
 
 #define SERVO_CONTROLLER_STATE_EVENT "servo"
 #define SERVO_CONTROLLER_SETTINGS_EVENT "servosettings"
@@ -75,7 +78,7 @@ public:
     void begin();
 
 private:
-    HttpRouterEndpoint<Servo_Driver&> _httpRouterEndpoint;
+    HttpStateRouterEndpoint<Servo_Driver&> _httpRouterEndpoint;
     FSPersistence<Servo_Driver&> _fsPersistence;
     ServoControllerJsonRouter _router;
 };

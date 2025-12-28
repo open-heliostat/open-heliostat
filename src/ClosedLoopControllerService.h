@@ -3,12 +3,16 @@
 
 #include <EventEndpoint.h>
 #include <FSPersistence.h>
-#include <StatelessService.h>
-#include <HttpRouterEndpoint.h>
+#include <lib/JsonStateRouter.h>
+#include <lib/HttpStateRouterEndpoint.h>
 
 #include <StepperService.h>
 
 #include <closedloopcontroller.h>
+
+using JsonStateRouting::JsonEventRouter;
+using JsonStateRouting::JsonRouter;
+using JsonStateRouting::JsonSaveManager;
 
 #define CL_CONTROLLER_STATE_EVENT "controller"
 #define CL_CONTROLLER_SETTINGS_EVENT "controllersettings"
@@ -79,7 +83,7 @@ public:
 
 private:
     // EventEndpoint<ClosedLoopController&> _eventEndpoint;
-    HttpRouterEndpoint<ClosedLoopController&> _httpRouterEndpoint;
+    HttpStateRouterEndpoint<ClosedLoopController&> _httpRouterEndpoint;
     FSPersistence<ClosedLoopController&> _fsPersistence;
     ClosedLoopControllerJsonRouter _router;
 };
