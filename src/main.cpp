@@ -18,6 +18,7 @@
 #include <HeliostatService.h>
 #include <ArtNetService.h>
 #include <MovementSequencerService.h>
+#include <ESPNowService.h>
 #include <pins.h>
 
 #define SERIAL_BAUD_RATE 115200
@@ -84,6 +85,13 @@ GPSStateService gpsStateService =  GPSStateService(
     &gpsneo,
     esp32sveltekit.getFeatureService());
 
+ESPNowState espNowState;
+
+ESPNowService espNowService = ESPNowService(
+    &server,
+    &esp32sveltekit,
+    espNowState);
+
 WiFiUDP teleplotUDP;
 
 void setup()
@@ -108,6 +116,7 @@ void setup()
     elSequencerService.begin();
     heliostatService.begin();
     artNetService.begin();
+    espNowService.begin();
 
     esp32sveltekit.getFeatureService()->addFeature("motors", true);
 
@@ -127,6 +136,7 @@ void loop()
     elSequencerService.loop();
     heliostatService.loop();
     artNetService.loop();
+    espNowService.loop();
     unsigned long now = millis();
     if (now - lastTick > 1000) {
         lastTick = now;
