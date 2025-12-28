@@ -65,6 +65,22 @@ JsonRouter<Servo_Driver> ServoControllerJsonRouter::router = JsonRouter<Servo_Dr
         }
         else return false;
     }},
+    {"autotune", [](JsonVariant content, Servo_Driver &controller) {
+        if (content.is<JsonObject>()) {
+            auto obj = content.as<JsonObject>();
+            if (obj["start"].is<bool>() && obj["start"].as<bool>()) {
+                double amp = obj["amp"].is<double>() ? obj["amp"].as<double>() : controller.autoTuneAmp;
+                double band = obj["band"].is<double>() ? obj["band"].as<double>() : controller.autoTuneBand;
+                controller.beginAutoTune(amp, band);
+                return true;
+            }
+            if (obj["cancel"].is<bool>() && obj["cancel"].as<bool>()) {
+                controller.cancelAutoTune();
+                return true;
+            }
+        }
+        return false;
+    }},
     {"limits", [](JsonVariant content, Servo_Driver &controller) {
         if (content.is<JsonObject>()) {
             auto obj = content.as<JsonObject>();
@@ -135,6 +151,14 @@ JsonRouter<Servo_Driver> ServoControllerJsonRouter::router = JsonRouter<Servo_Dr
     }},
     {"integral", [](Servo_Driver &controller, const JsonVariant target) {
         target.set(controller.integral);
+    }},
+    {"autotune", [](Servo_Driver &controller, const JsonVariant target) {
+        target["active"] = controller.isAutoTuneActive();
+        target["done"] = controller.isAutoTuneDone();
+        target["amp"] = controller.autoTuneAmp;
+        target["band"] = controller.autoTuneBand;
+        target["Ku"] = controller.tunedKu;
+        target["Tu"] = controller.tunedTu;
     }},
     {"limits", [](Servo_Driver &controller, const JsonVariant target) {
         target["enabled"] = controller.hasLimits;

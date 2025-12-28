@@ -10,6 +10,7 @@
 	import { getJsonRest, postJsonRest } from '$lib/stores/rest';
 	import DisableButton from './DisableButton.svelte';
 	import StopButton from './StopButton.svelte';
+    import Button from './Button.svelte';
 
     export let label: string;
     export let restPath : string;
@@ -35,6 +36,14 @@
             begin: 0,
             end: 360
         },
+            autotune: {
+                active: false,
+                done: false,
+                amp: 0.25,
+                band: 1.0,
+                Ku: 0,
+                Tu: 0
+            }
     };
 
     let intervalID: any;
@@ -58,6 +67,14 @@
     function postControllerState() {
         postJsonRest(restPath, controllerState).then((data) => controllerState = data);
     }
+
+        async function startAutotune() {
+            await postJsonRest(restPath, { autotune: { start: true, amp: controllerState.autotune?.amp, band: controllerState.autotune?.band }}).then((data) => controllerState = data);
+        }
+
+        async function cancelAutotune() {
+            await postJsonRest(restPath, { autotune: { cancel: true }}).then((data) => controllerState = data);
+        }
 </script>
 
 <SettingsCard>
@@ -150,6 +167,39 @@
                         step={0.01}
                         onChange={postControllerState}
                     ></Slider>
+                        <span class="text-lg col-span-full">Autotune</span>
+                        <Slider
+                            label="Relay Amp"
+                            bind:value={controllerState.autotune.amp}
+                            min={0.05}
+                            max={1}
+                            step={0.01}
+                            onChange={() => controllerState = { ...controllerState, autotune: { ...controllerState.autotune, amp: controllerState.autotune.amp } }}
+                            disabled={controllerState.autotune.active}
+                        ></Slider>
+                        <Slider
+                            label="Relay Band (deg)"
+                            bind:value={controllerState.autotune.band}
+                            min={0.1}
+                            max={5}
+                            step={0.1}
+                            onChange={() => controllerState = { ...controllerState, autotune: { ...controllerState.autotune, band: controllerState.autotune.band } }}
+                            disabled={controllerState.autotune.active}
+                        ></Slider>
+                        <div class="flex flex-row gap-2 items-center col-span-full">
+                            <Button onClick={startAutotune} disabled={controllerState.autotune.active}>Start Autotune</Button>
+                            <Button onClick={cancelAutotune} kind="ghost" disabled={!controllerState.autotune.active}>Cancel</Button>
+                            {#if controllerState.autotune.active}
+                                <span class="text-sm opacity-70">Running...</span>
+                            {:else if controllerState.autotune.done}
+                                <span class="text-sm opacity-70">Done. P={controllerState.P.toFixed(3)} I={controllerState.I.toFixed(3)} D={controllerState.D.toFixed(3)}</span>
+                            {/if}
+                        </div>
+                        <div class="grid grid-cols-3 gap-2 text-sm col-span-full opacity-70">
+                            <div>Ku: {controllerState.autotune.Ku.toFixed(3)}</div>
+                            <div>Tu: {controllerState.autotune.Tu.toFixed(3)} s</div>
+                            <div>Output: {controllerState.curGain.toFixed(3)}</div>
+                        </div>
                     <Checkbox 
                         label="Plot" 
                         bind:value={controllerState.plot}

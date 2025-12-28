@@ -257,6 +257,14 @@ export type ServoControllerState = BaseControllerState & {
 	derivative: number;
 	integral: number;
 	plot: boolean;
+	autotune?: {
+		active: boolean;
+		done: boolean;
+		amp: number;
+		band: number;
+		Ku: number;
+		Tu: number;
+	};
 }
 
 export type ControllerState = BaseControllerState | ServoControllerState;
