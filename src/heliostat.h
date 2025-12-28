@@ -58,7 +58,7 @@ public:
     void run() 
     {
         unsigned long now = millis();
-        if (enabled & now - lastCommand > 1000) {
+        if (enabled && (now - lastCommand > 1000)) {
             reflectCurrentSource();
             lastCommand = now;
         }
