@@ -61,7 +61,9 @@
 </script>
 
 <SettingsCard>
-	<span slot="title">{label} Controller</span>
+    {#snippet title()}
+        <span>{label} Controller</span>
+    {/snippet}
     {#await getControllerState()}
     <Spinner></Spinner>
     {:then nothing}
@@ -85,7 +87,9 @@
                 ></Slider>
             </GridForm>
             <Collapsible>
-                <span slot="title">Settings</span>
+                {#snippet title()}
+                    <span>Settings</span>
+                {/snippet}
                 <span class="text-lg">Control</span>
                 <GridForm>
                     <Checkbox 

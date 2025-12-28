@@ -19,8 +19,12 @@
 </style>
 
 	<Collapsible open={false}>
-		<Settings slot="icon" class="flex-shrink-0 mr-2 h-6 w-6 self-end" />
-		<span slot="title">Settings</span>
+		{#snippet icon()}
+			<Settings class="flex-shrink-0 mr-2 h-6 w-6 self-end" />
+		{/snippet}
+		{#snippet title()}
+			<span>Settings</span>
+		{/snippet}
 		<div class="w-full overflow-x-auto">
 			<form
 			>

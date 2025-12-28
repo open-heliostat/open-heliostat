@@ -22,12 +22,12 @@
 	import GPS from '~icons/tabler/satellite';
 	import Rotation from '~icons/tabler/rotate-dot'
 	import Status from '~icons/tabler/device-heart-monitor';
-	import { page } from '$app/state';
+	import { page } from '$app/stores';
 	import { user } from '$lib/stores/user';
 
 	let { closeMenu } = $props();
 
-	const github = { href: 'https://github.com/' + page.data.github, active: true };
+	const github = { href: 'https://github.com/' + $page.data.github, active: true };
 
 	const discord = { href: 'https://discord.gg/MTn9mVUG5n', active: true };
 
@@ -76,19 +76,19 @@
 		{
 			title: 'Connections',
 			icon: Remote,
-			feature: page.data.features.mqtt || page.data.features.ntp,
+			feature: $page.data.features.mqtt || $page.data.features.ntp,
 			submenu: [
 				{
 					title: 'MQTT',
 					icon: MQTT,
 					href: '/connections/mqtt',
-					feature: page.data.features.mqtt
+					feature: $page.data.features.mqtt
 				},
 				{
 					title: 'NTP',
 					icon: NTP,
 					href: '/connections/ntp',
-					feature: page.data.features.ntp
+					feature: $page.data.features.ntp
 				},
 				{
 					title: 'GPS',
@@ -122,13 +122,13 @@
 			title: 'Ethernet',
 			icon: PlugConnected,
 			href: '/ethernet',
-			feature: page.data.features.ethernet
+			feature: $page.data.features.ethernet
 		},
 		{
 			title: 'Users',
 			icon: Users,
 			href: '/user',
-			feature: page.data.features.security && $user.admin
+			feature: $page.data.features.security && $user.admin
 		},
 		{
 			title: 'System',
@@ -145,23 +145,23 @@
 					title: 'System Metrics',
 					icon: Metrics,
 					href: '/system/metrics',
-					feature: page.data.features.analytics
+					feature: $page.data.features.analytics
 				},
 				{
 					title: 'Core Dump',
 					icon: Bug,
 					href: '/system/coredump',
-					feature: page.data.features.coredump
+					feature: $page.data.features.coredump
 				},
 				{
 					title: 'Firmware Update',
 					icon: Update,
 					href: '/system/update',
 					feature:
-						(page.data.features.ota ||
-							page.data.features.upload_firmware ||
-							page.data.features.download_firmware) &&
-						(!page.data.features.security || $user.admin)
+						($page.data.features.ota ||
+							$page.data.features.upload_firmware ||
+							$page.data.features.download_firmware) &&
+						(!$page.data.features.security || $user.admin)
 				}
 			]
 		}
@@ -178,7 +178,7 @@
 	}
 
 	$effect(() => {
-		setActiveMenuItem(page.data.title);
+		setActiveMenuItem($page.data.title);
 	});
 </script>
 
@@ -190,7 +190,7 @@
 		onclick={() => setActiveMenuItem('')}
 	>
 		<img src={logo} alt="Logo" class="max-h-12 max-w-12 h-auto w-auto object-contain" />
-		<h1 class="px-4 text-2xl font-bold">{page.data.appName}</h1>
+		<h1 class="px-4 text-2xl font-bold">{$page.data.appName}</h1>
 	</a>
 	<ul class="menu w-full rounded-box menu-vertical flex-nowrap overflow-y-auto">
 		{#each menuItems as menuItem, i (menuItem.title)}
@@ -237,7 +237,7 @@
 	<div class="flex-col"></div>
 	<div class="grow"></div>
 
-	{#if page.data.features.security}
+	{#if $page.data.features.security}
 		<div class="flex items-center">
 			<Avatar class="h-8 w-8" />
 			<span class="grow px-4 text-xl font-bold">{$user.username}</span>
@@ -267,7 +267,7 @@
 			>
 		{/if}
 		<div class="inline-flex grow items-center justify-end text-sm">
-			<Copyright class="h-4 w-4" /><span class="px-2">{page.data.copyright}</span>
+			<Copyright class="h-4 w-4" /><span class="px-2">{$page.data.copyright}</span>
 		</div>
 	</div>
 </div>

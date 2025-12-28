@@ -77,8 +77,12 @@
 </script>
 
 <SettingsCard collapsible={false}>
-	<Satellite slot="icon" class="lex-shrink-0 mr-2 h-6 w-6 self-end" />
-	<span slot="title">GPS</span>
+	{#snippet icon()}
+		<Satellite class="lex-shrink-0 mr-2 h-6 w-6 self-end" />
+	{/snippet}
+	{#snippet title()}
+		<span>GPS</span>
+	{/snippet}
 
 	<div class="alert {infoClass} my-2 shadow-lg">
 		<Info class="h-6 w-6 flex-shrink-0 stroke-current" />
@@ -105,7 +109,9 @@
 
 	{#if !$page.data.features.security || $user.admin}
 		<Collapsible open={false} class="shadow-lg" on:closed={getGPSSettings}>
-			<span slot="title">Settings</span>
+			{#snippet title()}
+				<span>Settings</span>
+			{/snippet}
 			<form
 				class="form-control w-full"
 				on:submit|preventDefault={() => postGPSSettings(gpsSettings)}

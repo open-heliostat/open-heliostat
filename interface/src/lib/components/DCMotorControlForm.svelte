@@ -61,7 +61,9 @@
 </div>
 {/await}
 <Collapsible>
-	<span slot="title">Settings</span>
+	{#snippet title()}
+		<span>Settings</span>
+	{/snippet}
 	<slot></slot>
 </Collapsible>
 <div class="flex flex-row flex-wrap justify-between gap-x-2">

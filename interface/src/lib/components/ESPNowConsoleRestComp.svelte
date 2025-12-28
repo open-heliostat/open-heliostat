@@ -101,8 +101,12 @@
 </style>
 
 <SettingsCard>
-    <Terminal slot="icon" class="flex-shrink-0 mr-2 h-6 w-6 self-end" />
-    <span slot="title">ESPNow Console</span>
+    {#snippet icon()}
+        <Terminal class="flex-shrink-0 mr-2 h-6 w-6 self-end" />
+    {/snippet}
+    {#snippet title()}
+        <span>ESPNow Console</span>
+    {/snippet}
     {#await getEspnowState()}
         <Spinner></Spinner>
     {:then nothing}
@@ -145,7 +149,9 @@
         onChange={sendMessage}
     />
     <Collapsible>
-        <span slot="title">Settings</span>
+        {#snippet title()}
+            <span>Settings</span>
+        {/snippet}
         <Checkbox
             label="Auto Ping"
             bind:value={espnowState.autoPing}

@@ -112,7 +112,9 @@
 </script>
 
 <SettingsCard>
-	<span slot="title">{label} Controller</span>
+    {#snippet title()}
+        <span>{label} Controller</span>
+    {/snippet}
     {#await getControllerState()}
     <Spinner></Spinner>
     {:then nothing}
@@ -239,7 +241,7 @@
     {/await}
     
     <!-- <Collapsible>
-        <span slot="title">{label} Stepper</span>
+        <span>{label} Stepper</span>
         {#await fetch(restPath + '/stepper/control').then(async (res) => await res.json())}
         {:then data} 
             <StepperControlForm 
@@ -256,7 +258,7 @@
         {/await}
     </Collapsible> -->
     <!-- <Collapsible>
-        <span slot="title">{label} Stepper</span>
+        <span>{label} Stepper</span>
         <StepperRestComp restPath={restPath + "/stepper"}></StepperRestComp>
     </Collapsible> -->
 

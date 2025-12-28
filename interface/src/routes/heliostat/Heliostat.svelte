@@ -93,8 +93,12 @@
 </script>
 
 <SettingsCard collapsible={false}>
-	<Light slot="icon" class="flex-shrink-0 mr-2 h-6 w-6 self-end" />
-	<span slot="title">Heliostat Control</span>
+	{#snippet icon()}
+		<Light class="flex-shrink-0 mr-2 h-6 w-6 self-end" />
+	{/snippet}
+	{#snippet title()}
+		<span>Heliostat Control</span>
+	{/snippet}
 	<div class="w-full">
 		{#await getHeliostatControllerState() then nothing}
 		<div class="grid w-full grid-cols-1 content-center gap-x-4 sm:grid-cols-2">
@@ -177,7 +181,9 @@
 </SettingsCard>
 
 <SettingsCard>
-	<span slot="title">Sun Tracker</span>
+	{#snippet title()}
+		<span>Sun Tracker</span>
+	{/snippet}
 	{#await getHeliostatControllerState() then nothing}
 	<div class="alert {heliostatControllerState.sunTracker.isTimeSet ? 'alert-info' : 'alert-warning'} my-2 shadow-lg">
 		<Info class="h-6 w-6 flex-shrink-0 stroke-current" />

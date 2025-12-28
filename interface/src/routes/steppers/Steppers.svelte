@@ -12,10 +12,14 @@
 </script>
 
 <SettingsCard>
-	<span slot="title">Azimuth Stepper</span>
+	{#snippet title()}
+		<span>Azimuth Stepper</span>
+	{/snippet}
 	<StepperRestComp restPath={"/rest/heliostat/azimuth/stepper"}></StepperRestComp>
 </SettingsCard>
 <SettingsCard>
-	<span slot="title">Elevation Stepper</span>
+	{#snippet title()}
+		<span>Elevation Stepper</span>
+	{/snippet}
 	<StepperRestComp restPath={"/rest/heliostat/elevation/stepper"}></StepperRestComp>
 </SettingsCard>

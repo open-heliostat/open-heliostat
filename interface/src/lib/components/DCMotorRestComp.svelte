@@ -1,8 +1,4 @@
 <script lang="ts">
-
-	import type { StepperConfig, StepperControlState, StepperDiag } from '$lib/types/models'
-	import { postJsonRest, getJsonRest} from "$lib/stores/rest"
-	import { onDestroy, onMount } from "svelte";
 	import SettingsCard from './SettingsCard.svelte';
 	import DcMotorControlForm from './DCMotorControlForm.svelte';
 	import DcMotorSettingsForm from './DCMotorSettingsForm.svelte';
@@ -13,7 +9,9 @@
 </script>
 
 <SettingsCard>
-	<span slot="title">{name}</span>
+	{#snippet title()}
+		<span>{name}</span>
+	{/snippet}
 	<DcMotorControlForm
 		restPath={restPath + "/control"}
 	>
