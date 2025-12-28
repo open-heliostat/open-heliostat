@@ -4,7 +4,6 @@
 	import { postJsonRest, getJsonRest} from "$lib/stores/rest"
 	import { onDestroy, onMount } from "svelte";
 	import StopButton from './StopButton.svelte';
-	import { splineCurve } from 'chart.js/helpers';
 	import Checkbox from './Checkbox.svelte';
 	import Collapsible from './Collapsible.svelte';
 
@@ -28,12 +27,6 @@
 		return postJsonRest(restPath, control);
 	}
 </script>
-
-<style>
-	.grid-form {
-	  grid-template-columns: [labels] auto [controls] 1fr;
-	}
-</style>
 
 {#await getMotorControl() then nothing}
 <div class="w-full grid grid-flow-row grid-form items-center">

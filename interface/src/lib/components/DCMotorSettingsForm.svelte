@@ -16,12 +16,6 @@
 	}
 </script>
 
-<style>
-	.grid-form {
-	  grid-template-columns: [labels] auto [controls] 1fr;
-	}
-</style>
-
 {#await getmotorSettings() then nothing}
 <div class="w-full grid grid-flow-row grid-form items-center">
 	<Checkbox

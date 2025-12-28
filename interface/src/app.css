@@ -20,3 +20,26 @@
     border-color: var(--color-gray-200, currentcolor);
   }
 }
+
+@layer components {
+  /* Generic two-column form layout: label + control that stretches */
+  .grid-form {
+    display: grid;
+    grid-template-columns: [labels] minmax(7rem, auto) [controls] 1fr;
+    grid-auto-flow: row;
+    gap: 0.5rem 1rem;
+    align-items: center;
+    width: 100%;
+  }
+  .grid-form > label {
+    grid-column: labels;
+    margin: 0;
+  }
+  .grid-form > :not(label) {
+    grid-column: controls;
+    width: 100%;
+  }
+  .grid-form input[type="range"] {
+    width: 100%;
+  }
+}

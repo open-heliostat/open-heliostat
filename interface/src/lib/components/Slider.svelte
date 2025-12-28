@@ -13,26 +13,25 @@
 <label class="label cursor-pointer" for={label}>
     <span class="mr-4">{label}</span>
 </label>
-<div class="flex-row flex items-center space-x-2">
-    <input 
+<div class="flex w-full items-center gap-3">
+    <input
         type="range"
-        min={min} 
+        min={min}
         max={max}
         step={step}
-        class={"range " + (disabled == false ? "range-primary" : "range-secondary")}
+        class={"range flex-1 " + (disabled == false ? "range-primary" : "range-secondary")}
         id={label}
         {disabled}
         bind:value={value}
         on:change={onChange}
     />
     {#if hasNumber}
-    <input 
+    <input
         type="number"
-        min={min} 
+        min={min}
         max={max}
         step={step}
-        class="input input-bordered"
-        style="height: 2rem; width: 5rem"
+        class="input input-bordered h-8 w-20"
         id={label}
         {disabled}
         bind:value={value}
