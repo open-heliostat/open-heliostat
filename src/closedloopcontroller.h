@@ -5,7 +5,6 @@
 #include <tmcdriver.h>
 #include <encoder.h>
 #include <abstractcontroller.h>
-#include <ClosedLoopControllerService.h>
 
 class ClosedLoopController : public AbstractController
 {

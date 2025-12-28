@@ -10,6 +10,7 @@
 	import Router from '~icons/tabler/router';
 	import AP from '~icons/tabler/access-point';
 	import Remote from '~icons/tabler/network';
+	import Antenna from '~icons/tabler/antenna';
 	import Control from '~icons/tabler/adjustments';
 	import Avatar from '~icons/tabler/user-circle';
 	import Logout from '~icons/tabler/logout';
@@ -101,7 +102,13 @@
 					icon: Remote,
 					href: '/connections/espnow',
 					feature: $page.data.features.espnow
-				}
+				},
+				{
+					title: 'Art-Net',
+					icon: Antenna,
+					href: '/artnet',
+					feature: $page.data.features.artnet ?? true,
+				},
 			]
 		},
 		{

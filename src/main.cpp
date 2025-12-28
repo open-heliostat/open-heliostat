@@ -16,6 +16,7 @@
 #include <PsychicHttpServer.h>
 #include <GPSService.h>
 #include <HeliostatService.h>
+#include <ArtNetService.h>
 #include <MovementSequencerService.h>
 #include <pins.h>
 
@@ -67,6 +68,10 @@ HeliostatService heliostatService = HeliostatService(
     esp32sveltekit.getSecurityManager(),
     heliostatController);
 
+ArtNetService artNetService = ArtNetService(
+    &esp32sveltekit,
+    &heliostatController);
+
 GPSSettingsService gpsSettingsService = GPSSettingsService(
     &server,
     esp32sveltekit.getFS(),
@@ -102,6 +107,7 @@ void setup()
     azSequencerService.begin();
     elSequencerService.begin();
     heliostatService.begin();
+    artNetService.begin();
 
     esp32sveltekit.getFeatureService()->addFeature("motors", true);
 
@@ -120,6 +126,7 @@ void loop()
     azSequencerService.loop();
     elSequencerService.loop();
     heliostatService.loop();
+    artNetService.loop();
     unsigned long now = millis();
     if (now - lastTick > 1000) {
         lastTick = now;
