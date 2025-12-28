@@ -3,7 +3,7 @@
 
 #include <WiFiUdp.h>
 
-#define TELEPLOT_HOST "192.168.4.2"  // Your computer's IP
+#define TELEPLOT_HOST "192.168.1.29"  // Your computer's IP
 #define TELEPLOT_PORT 47269            // Default Teleplot port
 
 extern WiFiUDP teleplotUDP;

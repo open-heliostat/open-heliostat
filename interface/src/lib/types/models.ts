@@ -269,6 +269,18 @@ export type ServoControllerState = BaseControllerState & {
 
 export type ControllerState = BaseControllerState | ServoControllerState;
 
+export type SequencerKeyframe = {
+    tMs: number;
+    value: number;
+};
+
+export type MovementSequencerState = {
+    frames: SequencerKeyframe[];
+    loop: boolean;
+    running: boolean;
+    duration: number;
+};
+
 export type DCMotorControlState = {
     speed: number;
     duty: number;

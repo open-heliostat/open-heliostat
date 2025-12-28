@@ -16,6 +16,7 @@
 #include <PsychicHttpServer.h>
 #include <GPSService.h>
 #include <HeliostatService.h>
+#include <MovementSequencerService.h>
 #include <pins.h>
 
 #define SERIAL_BAUD_RATE 115200
@@ -32,9 +33,32 @@ Encoder encoder2 = Encoder(SDA2, SCL2, Wire1);
 Servo_Driver servo1 = {motor1, encoder1};
 Servo_Driver servo2 = {motor2, encoder2};
 
+MovementSequencer azSequencer = MovementSequencer(servo1);
+MovementSequencer elSequencer = MovementSequencer(servo2);
+
 SerialGPS gpsneo = SerialGPS(Serial1, GPSRX, GPSTX);
 
 HeliostatController heliostatController = {servo1, servo2, gpsneo};
+
+MovementSequencerService azSequencerService = MovementSequencerService(
+    &server,
+    esp32sveltekit.getSocket(),
+    esp32sveltekit.getFS(),
+    esp32sveltekit.getSecurityManager(),
+    azSequencer,
+    "/rest/heliostat/azimuth/sequence",
+    "/config/heliostat-az-sequence.json",
+    "heliostat-az-sequence");
+
+MovementSequencerService elSequencerService = MovementSequencerService(
+    &server,
+    esp32sveltekit.getSocket(),
+    esp32sveltekit.getFS(),
+    esp32sveltekit.getSecurityManager(),
+    elSequencer,
+    "/rest/heliostat/elevation/sequence",
+    "/config/heliostat-el-sequence.json",
+    "heliostat-el-sequence");
 
 HeliostatService heliostatService = HeliostatService(
     &server,
@@ -75,6 +99,8 @@ void setup()
     gpsSettingsService.begin();
     gpsStateService.begin();
 
+    azSequencerService.begin();
+    elSequencerService.begin();
     heliostatService.begin();
 
     esp32sveltekit.getFeatureService()->addFeature("motors", true);
@@ -91,6 +117,8 @@ void loop()
 {
     // Delete Arduino loop task, as it is not needed in this example
     // vTaskDelete(NULL);
+    azSequencerService.loop();
+    elSequencerService.loop();
     heliostatService.loop();
     unsigned long now = millis();
     if (now - lastTick > 1000) {

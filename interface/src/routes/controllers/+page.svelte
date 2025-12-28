@@ -1,6 +1,7 @@
 <script lang="ts">
 	import ControllerRestComp from '$lib/components/ControllerRestComp.svelte';
 	import ServoControllerRestComp from '$lib/components/ServoControllerRestComp.svelte';
+	import SequencerComp from '$lib/components/SequencerComp.svelte';
 	import type { PageData } from '../$types';
 	export let data: PageData;
 </script>
@@ -33,5 +34,15 @@
 		restPath="/rest/heliostat/elevation"
 		>
 	</ServoControllerRestComp>
+	<SequencerComp
+		label="Azimuth"
+		restPath="/rest/heliostat/azimuth/sequence"
+		>
+	</SequencerComp>
+	<SequencerComp
+		label="Elevation"
+		restPath="/rest/heliostat/elevation/sequence"
+		>
+	</SequencerComp>
 {/if}
 </div>
