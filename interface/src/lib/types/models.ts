@@ -281,3 +281,18 @@ export interface Remote {
 	version?: string;
     needsUpdate?: boolean;
 }
+
+export type GPSSettings = {
+	enabled: boolean;
+}
+
+export type GPSStatus = {
+	latitude: number;
+	longitude: number;
+	altitude: number;
+	numSats: number;
+	timeStr: string;
+	dateStr: string;
+	fixQuality: number;
+	hasSerial: boolean;
+}

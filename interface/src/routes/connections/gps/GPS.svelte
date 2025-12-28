@@ -96,7 +96,12 @@
 						Altitude : {gpsStatus.altitude.toFixed(1)} <br>
 						Date : {gpsStatus.dateStr}, Time : {gpsStatus.timeStr}
 					{:else if gpsStatus?.hasSerial}
-						No GPS reception !
+						No GPS reception ! <br>
+						Number of satellites: {gpsStatus.numSats} <br>
+						Latitude : {gpsStatus.latitude.toFixed(5)},
+						Longitude : {gpsStatus.longitude.toFixed(5)},
+						Altitude : {gpsStatus.altitude.toFixed(1)} <br>
+						Date : {gpsStatus.dateStr}, Time : {gpsStatus.timeStr}
 					{:else}
 						GPS module seems disconnected !
 					{/if}
@@ -108,7 +113,7 @@
 	</div>
 
 	{#if !$page.data.features.security || $user.admin}
-		<Collapsible open={false} class="shadow-lg" on:closed={getGPSSettings}>
+		<Collapsible open={false} class="shadow-lg">
 			{#snippet title()}
 				<span>Settings</span>
 			{/snippet}
