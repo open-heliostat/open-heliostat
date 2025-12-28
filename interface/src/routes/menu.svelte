@@ -76,7 +76,7 @@
 		{
 			title: 'Connections',
 			icon: Remote,
-			feature: $page.data.features.mqtt || $page.data.features.ntp,
+			feature: $page.data.features.mqtt || $page.data.features.ntp || $page.data.features.gps || $page.data.features.espnow,
 			submenu: [
 				{
 					title: 'MQTT',
@@ -94,8 +94,13 @@
 					title: 'GPS',
 					icon: GPS,
 					href: '/connections/gps',
-					feature: $page.data.features.gps,
-					
+					feature: $page.data.features.gps
+				},
+				{
+					title: 'ESP-NOW',
+					icon: Remote,
+					href: '/connections/espnow',
+					feature: $page.data.features.espnow
 				}
 			]
 		},
