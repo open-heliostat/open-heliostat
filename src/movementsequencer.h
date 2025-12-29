@@ -75,6 +75,13 @@ public:
             return true;
         }
 
+        // Handle case where elapsed time is before the first keyframe
+        if (elapsed < frames[0].tMs) {
+            controller.setTarget(frames[0].value);
+            controller.calcError();
+            return true;
+        }
+
         size_t idx = 0;
         while ((idx + 1) < frameCount && frames[idx + 1].tMs <= elapsed) {
             ++idx;

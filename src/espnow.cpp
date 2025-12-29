@@ -82,12 +82,19 @@ namespace ESPNow
 
     bool sendMessage(const String &message, const uint8_t *macAddr)
     {
+        if (message.length() > 250) {
+            ESP_LOGE("ESP-NOW", "Message too long: %d", message.length());
+            return false;
+        }
         esp_now_peer_info_t peerInfo = {};
         peerInfo.encrypt = false;
         memcpy(&peerInfo.peer_addr, macAddr, 6);
         if (!esp_now_is_peer_exist(macAddr))
         {
-            esp_now_add_peer(&peerInfo);
+            if (esp_now_add_peer(&peerInfo) != ESP_OK) {
+                ESP_LOGE("ESP-NOW", "Failed to add peer");
+                return false;
+            }
         }
         esp_now_get_peer(macAddr, &peerInfo);
         peerInfo.ifidx = interface;
@@ -409,7 +416,7 @@ namespace ESPNow
         // esp_wifi_set_protocol(WIFI_IF_STA, uint8_t(7));
         // preferences.begin("wireless");
         if (WiFi.status() == WL_CONNECTED) {
-            // channel = WiFi.channel();
+            channel = WiFi.channel();
             // preferences.putInt("lastChannel", channel);
             interface = WIFI_IF_AP;
             // esp_wifi_set_protocol( WIFI_IF_AP, WIFI_PROTOCOL_LR );

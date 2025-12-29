@@ -90,8 +90,8 @@ public:
     String currentSource = "Sun";
     String currentTarget = "Default Target";
 
-    double latitude;
-    double longitude;
+    double latitude = 0.0;
+    double longitude = 0.0;
 
     void getLocationFromGPS() {
         if (gps.numSats > 3) {

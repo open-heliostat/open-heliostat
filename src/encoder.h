@@ -10,10 +10,12 @@ public:
     double angle;
     bool invert = false;
     bool error = false;
-    Encoder(int SDA = SDA, int SCL = SCL, TwoWire &I2C_ = Wire) : I2C(I2C_) {
-        I2C.begin(SDA, SCL);
+    int _SDA, _SCL;
+    Encoder(int SDA = SDA, int SCL = SCL, TwoWire &I2C_ = Wire) : I2C(I2C_), _SDA(SDA), _SCL(SCL) {
+    }
+    void init() {
+        I2C.begin(_SDA, _SCL);
         I2C.setTimeOut(50);
-        // I2C.setClock(50000);
     }
     double getAngle() {
         update();

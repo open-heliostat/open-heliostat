@@ -92,7 +92,9 @@ struct vec3 {
         return vec3 {y*v.z-z*v.y, z*v.x-x*v.z, x*v.y-y*v.x};
     }
     vec3 normalize() {
-        return *this / length();
+        double len = length();
+        if (len == 0.0) return vec3{0.0, 0.0, 0.0};
+        return *this / len;
     }
     vec3 setUpDirection(vec3 up) {
         double az = getAngle(up.x, up.y);

@@ -132,6 +132,8 @@ struct Servo_Driver : public AbstractController
         }
     }
     void init() override {
+        motor.init();
+        encoder.init();
         getAngle();
         if (encoder.hasNewData()) {
             targetAngle = getAngle();

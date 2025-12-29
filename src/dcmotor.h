@@ -20,6 +20,8 @@ public:
 	Motor_Driver(uint8_t EN, uint8_t IN1, uint8_t IN2, uint8_t CHAN)
         : EN{EN}, IN1{IN1}, IN2{IN2}, CHAN{CHAN}
     {
+    }
+    void init() {
         // pinMode(EN, OUTPUT);
         ledcSetup(CHAN, 15000, 12);
 	    ledcAttachPin(EN, CHAN);
