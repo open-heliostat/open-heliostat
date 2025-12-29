@@ -7,6 +7,7 @@
 #include <lwip/apps/sntp.h>
 #include <TimeLib.h>
 #include <time.h>
+#include <cmath>
 
 using DirectionsMap = std::map<String, SphericalCoordinate>;
 
@@ -92,14 +93,25 @@ public:
 
     double latitude = 0.0;
     double longitude = 0.0;
+    bool coordinatesDirty = false;
 
     void getLocationFromGPS() {
         if (gps.numSats > 3) {
-            latitude = gps.coords.latitude;
-            longitude = gps.coords.longitude;
+            double newLat = gps.coords.latitude;
+            double newLon = gps.coords.longitude;
+            if (std::fabs(newLat - latitude) > 1e-7 || std::fabs(newLon - longitude) > 1e-7) {
+                latitude = newLat;
+                longitude = newLon;
+                coordinatesDirty = true;
+            }
         }
     }
 
+    bool consumeCoordinatesDirty() {
+        bool dirty = coordinatesDirty;
+        coordinatesDirty = false;
+        return dirty;
+    }
     SphericalCoordinate getSolarPosition() 
     {
         return computeSolarPosition(latitude, longitude);

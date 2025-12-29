@@ -297,5 +297,8 @@ void HeliostatService::begin()
 void HeliostatService::loop() 
 {
     _state.run();
+    if (_state.consumeCoordinatesDirty()) {
+        _fsPersistence.writeToFS();
+    }
     // _stateService.updateState();
 }
