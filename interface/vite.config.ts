@@ -12,7 +12,7 @@ const config: UserConfig = {
 		}),
 		tailwindcss(),
 		// Shorten file names for LittleFS 32 char limit
-		viteLittleFS()
+		// viteLittleFS()
 	],
 	server: {
 		proxy: {
@@ -23,7 +23,7 @@ const config: UserConfig = {
 			},
 			// Proxying websockets ws://localhost:5173/ws -> ws://192.168.1.83/ws
 			'/ws': {
-				target: 'ws://192.168.1.111',
+				target: 'ws://192.168.1.31',
 				changeOrigin: true,
 				ws: true
 			}
