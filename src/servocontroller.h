@@ -23,6 +23,8 @@ struct Servo_Driver : public AbstractController
     double integralLimit = 1.0; // keeps integral from pushing output beyond motor limits
     double derivativeFilter = 0.2; // simple low-pass on derivative term
     uint32_t lastRunMs = 0;
+    uint32_t lastLoopWarnMs = 0;
+    uint32_t lastProfileWarnMs = 0;
     double lastAngle = 0.0;
     double maxDerivative = 500.0; // deg/s clamp to reduce noise spikes
     Mode mode = MODE_PID;
@@ -45,6 +47,10 @@ struct Servo_Driver : public AbstractController
     uint16_t telemetryIntervalMs = 50; // throttle telemetry to avoid UDP saturation
     uint32_t lastEncoderMs = 0;
     uint16_t encoderTimeoutMs = 200; // ms without encoder data before stopping motor
+    const uint16_t loopWarnThresholdMs = 50; // warn if control loop pauses beyond this
+    const uint16_t loopWarnCooldownMs = 500; // throttle warnings
+    const uint16_t profileWarnCooldownMs = 500; // throttle section profiling logs
+    const uint16_t sectionWarnMs = 20; // warn if a section in run() exceeds this
 	Servo_Driver(Motor_Driver &mot, Encoder &encoder)
         : AbstractController(encoder), motor{mot} {}
     uint8_t getType() const override { return 2; }
@@ -55,7 +61,11 @@ struct Servo_Driver : public AbstractController
         }
 
         uint32_t now = millis();
+        uint32_t tStartUs = micros();
+        uint32_t prevRunMs = lastRunMs;
+
         bool gotNew = encoder.update();
+        uint32_t tAfterEncoderUs = micros();
         if (gotNew || encoder.hasNewData()) {
             lastEncoderMs = now;
         } else {
@@ -73,8 +83,7 @@ struct Servo_Driver : public AbstractController
             return;
         }
 
-        double dt = lastRunMs == 0 ? 0.0 : (now - lastRunMs) / 1000.0;
-        lastRunMs = now;
+        double dt = prevRunMs == 0 ? 0.0 : (now - prevRunMs) / 1000.0;
 
         if (hasLimits) {
             double middle = calcMiddle();
@@ -109,6 +118,7 @@ struct Servo_Driver : public AbstractController
         }
 
         motor.setSpeed(curGain);
+        uint32_t tAfterMotorUs = micros();
         lastError = error;
         lastAngle = curAngle;
 
@@ -123,6 +133,32 @@ struct Servo_Driver : public AbstractController
             TELEPLOT_SEND("mode", mode);
             lastPlotMs = now;
         }
+
+        // Basic profiling to find stalls inside run().
+        uint32_t totalUs = tAfterMotorUs - tStartUs;
+        uint32_t encoderUs = tAfterEncoderUs - tStartUs;
+        uint32_t motorUs = tAfterMotorUs - tAfterEncoderUs;
+
+        // Merge loop lag warning with profiling numbers for clarity.
+        if (prevRunMs != 0) {
+            uint32_t gap = now - prevRunMs;
+            if (gap > loopWarnThresholdMs && (now - lastLoopWarnMs) > loopWarnCooldownMs) {
+                Serial.printf("Servo loop lag: %lu ms (mode %d) enc=%lu us motor=%lu us total=%lu us\n",
+                              (unsigned long)gap, (int)mode,
+                              (unsigned long)encoderUs, (unsigned long)motorUs, (unsigned long)totalUs);
+                lastLoopWarnMs = now;
+            }
+        }
+
+        if (millis() - lastProfileWarnMs > profileWarnCooldownMs) {
+            if (encoderUs > sectionWarnMs * 1000 || motorUs > sectionWarnMs * 1000 || totalUs > loopWarnThresholdMs * 1000) {
+                Serial.printf("Servo profile: enc=%lu us motor=%lu us total=%lu us\n", (unsigned long)encoderUs, (unsigned long)motorUs, (unsigned long)totalUs);
+                lastProfileWarnMs = millis();
+            }
+        }
+
+        // Update lastRunMs at the end so gap calculations use the previous timestamp.
+        lastRunMs = now;
     }
     void setAngle(double angle) override {
         setTarget(angle);

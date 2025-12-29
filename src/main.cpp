@@ -108,8 +108,8 @@ void setup()
     // start ESP32-SvelteKit
     esp32sveltekit.begin();
 
-    gpsneo.init();
     gpsSettingsService.begin();
+    gpsneo.init();
     gpsStateService.begin();
 
     azSequencerService.begin();
@@ -132,16 +132,49 @@ void loop()
 {
     // Delete Arduino loop task, as it is not needed in this example
     // vTaskDelete(NULL);
-    azSequencerService.loop();
-    elSequencerService.loop();
-    heliostatService.loop();
-    artNetService.loop();
-    espNowService.loop();
+    static unsigned long lastLoopMs = 0;
+    static unsigned long lastLoopWarnMs = 0;
+    const unsigned long loopWarnMs = 50;   // warn if main loop iteration gap exceeds this
+    const unsigned long loopWarnCooldownMs = 500;
+
+    unsigned long loopStartUs = micros();
+    unsigned long nowMs = millis();
+    if (lastLoopMs != 0) {
+        unsigned long gap = nowMs - lastLoopMs;
+        if (gap > loopWarnMs && (nowMs - lastLoopWarnMs) > loopWarnCooldownMs) {
+            Serial.printf("Main loop gap: %lu ms\n", gap);
+            lastLoopWarnMs = nowMs;
+        }
+    }
+    lastLoopMs = nowMs;
+
+    // Profiling helper without C++14 generic lambdas to stay compatible with the build flags.
+    auto prof = [&](const char *name, void (*fn)()) {
+        unsigned long t0 = micros();
+        fn();
+        unsigned long dt = micros() - t0;
+        if (dt > 20000) { // 20 ms section warning
+            Serial.printf("Main section slow: %s %lu us\n", name, dt);
+        }
+    };
+
+    prof("azSequencerService", +[](){ azSequencerService.loop(); });
+    prof("elSequencerService", +[](){ elSequencerService.loop(); });
+    prof("heliostatService",   +[](){ heliostatService.loop(); });
+    prof("artNetService",      +[](){ artNetService.loop(); });
+    prof("espNowService",      +[](){ espNowService.loop(); });
+
     unsigned long now = millis();
     if (now - lastTick > 1000) {
         lastTick = now;
-        gpsStateService.loop();
+        // gpsStateService moved to dedicated FreeRTOS task to avoid blocking control loop.
         // if (encoder1.hasNewData()) Serial.println(encoder1.angle);
         // if (encoder2.hasNewData()) Serial.println(encoder2.angle);
+    }
+
+    unsigned long loopDurUs = micros() - loopStartUs;
+    if (loopDurUs > 50000 && (millis() - lastLoopWarnMs) > loopWarnCooldownMs) { // 50 ms total
+        Serial.printf("Main loop total slow: %lu us\n", loopDurUs);
+        lastLoopWarnMs = millis();
     }
 }

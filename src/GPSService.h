@@ -6,6 +6,9 @@
 #include <FSPersistence.h>
 #include <FeaturesService.h>
 
+#include "freertos/FreeRTOS.h"
+#include "freertos/task.h"
+
 #include <gpsneo.h>
 
 #define GPS_STATE_EVENT "gps"
@@ -146,6 +149,11 @@ private:
     GPSSettingsService *_gpsSettingsService;
     SerialGPS *_GPS;
     FeaturesService *_featuresService;
+    TaskHandle_t _taskHandle = nullptr;
+    uint32_t _taskPeriodMs = 1000;
+
+    static void taskThunk(void *param);
+    void startTask(uint32_t periodMs);
 
     void onConfigUpdated();
 };

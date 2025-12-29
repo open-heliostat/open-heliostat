@@ -1,4 +1,6 @@
 #include <GPSService.h>
+#include "freertos/FreeRTOS.h"
+#include "freertos/task.h"
 
 GPSStateService::GPSStateService(EventSocket *socket,
                                  GPSSettingsService *gpsSettingsService,
@@ -20,10 +22,26 @@ void GPSStateService::begin()
 {
     _eventEndpoint.begin();
     updateState();
+    startTask(1000);
 }
 
 void GPSStateService::loop() {
     if (_gpsSettingsService->isEnabled() && _GPS->update()) updateState();
+}
+
+void GPSStateService::taskThunk(void *param) {
+    auto *svc = static_cast<GPSStateService *>(param);
+    for (;;) {
+        svc->loop();
+        vTaskDelay(pdMS_TO_TICKS(svc->_taskPeriodMs));
+    }
+}
+
+void GPSStateService::startTask(uint32_t periodMs) {
+    _taskPeriodMs = periodMs;
+    if (_taskHandle == nullptr) {
+        xTaskCreatePinnedToCore(taskThunk, "gpsTask", 4096, this, 1, &_taskHandle, 0);
+    }
 }
 
 void GPSStateService::updateState() {
