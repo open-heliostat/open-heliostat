@@ -40,10 +40,16 @@
 			isTimeSet: boolean;
 			azimuth: number;
 			elevation: number;
+			timestamp?: number;
+			utcIso?: string;
+			localIso?: string;
+			tz?: string;
+			offsetMinutes?: number;
 		}
 	}
 
 	let heliostatControllerState : HeliostatControllerState;
+	$: sunTrackerTime = heliostatControllerState?.sunTracker;
 
 	let selectedEditor = "Sun";
 	let selectedDirection: Direction;
@@ -60,14 +66,7 @@
 	function syncClientTime() {
 		const now = new Date();
 		postJsonRest(restPath + '/sunTracker', {
-			time: {
-				year: now.getUTCFullYear(),
-				month: now.getUTCMonth() + 1,
-				day: now.getUTCDate(),
-				hour: now.getUTCHours(),
-				minute: now.getUTCMinutes(),
-				second: now.getUTCSeconds(),
-			}
+			timeIso: now.toISOString().slice(0, 19) // YYYY-MM-DDTHH:MM:SSZ -> strip Z for UTC parsing on device
 		}).then(() => getHeliostatControllerState());
 	}
 
@@ -190,6 +189,10 @@
 		<span>
 			{#if heliostatControllerState.sunTracker.isTimeSet}
 			Azimuth : {heliostatControllerState.sunTracker.azimuth}, Elevation : {heliostatControllerState.sunTracker.elevation}
+			<br />
+			Time (UTC): {sunTrackerTime?.utcIso ?? '—'}
+			<br />
+			Local ({sunTrackerTime?.tz ?? 'UTC'}): {sunTrackerTime?.localIso ?? '—'} {sunTrackerTime?.offsetMinutes !== undefined ? `(offset ${sunTrackerTime.offsetMinutes} min)` : ''}
 			{:else}
 			Time is not set !
 			{/if}

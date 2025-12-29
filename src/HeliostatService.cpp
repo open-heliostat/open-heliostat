@@ -2,6 +2,62 @@
 #include "TimeLib.h"
 #include <time.h>
 #include <sys/time.h>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+
+namespace {
+
+// Build a UTC epoch without depending on the currently configured timezone
+time_t makeUtcTime(struct tm tmValue) {
+#if defined(__USE_MISC) || defined(__GNU_SOURCE) || defined(_BSD_SOURCE)
+    // timegm is available in newlib used by ESP32; it interprets tm as UTC
+    return timegm(&tmValue);
+#else
+    char previousTz[64] = {0};
+    const char *tz = getenv("TZ");
+    if (tz) {
+        strncpy(previousTz, tz, sizeof(previousTz) - 1);
+    }
+
+    setenv("TZ", "UTC0", 1);
+    tzset();
+    time_t utcEpoch = mktime(&tmValue);
+
+    if (previousTz[0] != '\0') {
+        setenv("TZ", previousTz, 1);
+    } else {
+        unsetenv("TZ");
+    }
+    tzset();
+
+    return utcEpoch;
+#endif
+}
+
+long currentTzOffsetSeconds(time_t now) {
+    struct tm localTm;
+    struct tm gmTm;
+    localtime_r(&now, &localTm);
+    gmtime_r(&now, &gmTm);
+
+    time_t localAsEpoch = mktime(&localTm);
+    time_t gmAsEpoch = mktime(&gmTm);
+    return static_cast<long>(difftime(localAsEpoch, gmAsEpoch));
+}
+
+void formatIso8601(char *buffer, size_t len, const struct tm &tmValue, const char *suffix) {
+    snprintf(buffer, len, "%04d-%02d-%02dT%02d:%02d:%02d%s",
+             tmValue.tm_year + 1900,
+             tmValue.tm_mon + 1,
+             tmValue.tm_mday,
+             tmValue.tm_hour,
+             tmValue.tm_min,
+             tmValue.tm_sec,
+             suffix);
+}
+
+}
 
 JsonRouter<HeliostatController> HeliostatControllerJsonRouter::router = JsonRouter<HeliostatController>(
 {
@@ -64,6 +120,21 @@ JsonRouter<HeliostatController> HeliostatControllerJsonRouter::router = JsonRout
             if (obj["latitude"].is<double>()) controller.latitude = obj["latitude"].as<double>();
             if (obj["longitude"].is<double>()) controller.longitude = obj["longitude"].as<double>();
             if (obj["getFromGPS"].is<JsonVariant>()) controller.getLocationFromGPS();
+            if (obj["timeIso"].is<const char*>()) {
+                const char *iso = obj["timeIso"].as<const char*>();
+                struct tm tmValue = {0};
+                if (strptime(iso, "%Y-%m-%dT%H:%M:%S", &tmValue) != nullptr) {
+                    tmValue.tm_isdst = 0;
+                    time_t manualTime = makeUtcTime(tmValue);
+
+                    // Update TimeLib
+                    setTime(tmValue.tm_hour, tmValue.tm_min, tmValue.tm_sec,
+                            tmValue.tm_mday, tmValue.tm_mon + 1, tmValue.tm_year + 1900);
+
+                    struct timeval tv = {.tv_sec = manualTime, .tv_usec = 0};
+                    settimeofday(&tv, nullptr);
+                }
+            }
             if (obj["time"].is<JsonObject>()) {
                 JsonObject timeObj = obj["time"];
                 int year = timeObj["year"].as<int>() | 0;
@@ -73,10 +144,10 @@ JsonRouter<HeliostatController> HeliostatControllerJsonRouter::router = JsonRout
                 int minute = timeObj["minute"].as<int>() | 0;
                 int second = timeObj["second"].as<int>() | 0;
                 
-                // Update TimeLib time
-                setTime(hour, minute, second, year, month, day);
-                
-                // Also update system time so it stays in sync with TimeLib
+                // Update TimeLib time (expects day, month, year ordering)
+                setTime(hour, minute, second, day, month, year);
+
+                // Treat incoming values as UTC so local TZ/DST does not skew the date
                 struct tm timeinfo = {0};
                 timeinfo.tm_year = year - 1900;  // tm_year is years since 1900
                 timeinfo.tm_mon = month - 1;     // tm_mon is 0-11
@@ -84,7 +155,8 @@ JsonRouter<HeliostatController> HeliostatControllerJsonRouter::router = JsonRout
                 timeinfo.tm_hour = hour;
                 timeinfo.tm_min = minute;
                 timeinfo.tm_sec = second;
-                time_t manualTime = mktime(&timeinfo);
+                timeinfo.tm_isdst = 0;
+                time_t manualTime = makeUtcTime(timeinfo);
                 struct timeval tv = {.tv_sec = manualTime, .tv_usec = 0};
                 settimeofday(&tv, nullptr);
             }
@@ -114,11 +186,39 @@ JsonRouter<HeliostatController> HeliostatControllerJsonRouter::router = JsonRout
     }},
     {"sunTracker", [&](HeliostatController &controller, JsonVariant content) {
         JsonObject obj = content.to<JsonObject>();
+        time_t now = time(nullptr);
+        long tzOffsetSeconds = currentTzOffsetSeconds(now);
+        int tzOffsetMinutes = static_cast<int>(tzOffsetSeconds / 60);
+
         obj["latitude"] = controller.latitude;
         obj["longitude"] = controller.longitude;
         obj["isTimeSet"] = controller.isTimeSet();
         obj["azimuth"] = controller.getSolarPosition().azimuth;
         obj["elevation"] = controller.getSolarPosition().elevation;
+        obj["timestamp"] = static_cast<long>(now);
+
+        const char *tz = getenv("TZ");
+        obj["tz"] = tz ? tz : "UTC";
+        obj["offsetMinutes"] = tzOffsetMinutes;
+
+        char utcIso[26];
+        char localIso[32];
+        char offsetSuffix[7];
+
+        struct tm utcTm;
+        struct tm localTm;
+        gmtime_r(&now, &utcTm);
+        localtime_r(&now, &localTm);
+
+        formatIso8601(utcIso, sizeof(utcIso), utcTm, "Z");
+
+        char sign = tzOffsetSeconds >= 0 ? '+' : '-';
+        int absMinutes = tzOffsetMinutes >= 0 ? tzOffsetMinutes : -tzOffsetMinutes;
+        snprintf(offsetSuffix, sizeof(offsetSuffix), "%c%02d:%02d", sign, absMinutes / 60, absMinutes % 60);
+        formatIso8601(localIso, sizeof(localIso), localTm, offsetSuffix);
+
+        obj["utcIso"] = utcIso;
+        obj["localIso"] = localIso;
     }},
     {"azimuth", [&](HeliostatController &controller, JsonVariant content) {
         if (content.is<JsonObject>()) {

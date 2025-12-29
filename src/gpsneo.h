@@ -8,6 +8,8 @@
 #include "TimeLib.h"
 #include <time.h>
 #include <sys/time.h>
+#include <cstdlib>
+#include <cstring>
 
 struct GeoCoords {
     double longitude;
@@ -55,7 +57,7 @@ public:
                 // Update TimeLib time
                 setTime(gps.time.hour(), gps.time.minute(), gps.time.second(), gps.date.day(), gps.date.month(), gps.date.year());
                 
-                // Also update system time so NTP and GPS time stay in sync
+                // Also update system time so NTP and GPS time stay in sync (GPS time is UTC)
                 struct tm timeinfo = {0};
                 timeinfo.tm_year = gps.date.year() - 1900;  // tm_year is years since 1900
                 timeinfo.tm_mon = gps.date.month() - 1;     // tm_mon is 0-11
@@ -63,7 +65,27 @@ public:
                 timeinfo.tm_hour = gps.time.hour();
                 timeinfo.tm_min = gps.time.minute();
                 timeinfo.tm_sec = gps.time.second();
+                timeinfo.tm_isdst = 0;
+                // Convert as UTC regardless of configured TZ
+#if defined(__USE_MISC) || defined(__GNU_SOURCE) || defined(_BSD_SOURCE)
+                time_t gpsTime = timegm(&timeinfo);
+#else
+                char previousTz[64] = {0};
+                const char *tz = getenv("TZ");
+                if (tz) {
+                    strncpy(previousTz, tz, sizeof(previousTz) - 1);
+                }
+                setenv("TZ", "UTC0", 1);
+                tzset();
                 time_t gpsTime = mktime(&timeinfo);
+                if (previousTz[0] != '\0') {
+                    setenv("TZ", previousTz, 1);
+                } else {
+                    unsetenv("TZ");
+                }
+                tzset();
+#endif
+
                 struct timeval tv = {.tv_sec = gpsTime, .tv_usec = 0};
                 settimeofday(&tv, nullptr);
                 
