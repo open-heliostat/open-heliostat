@@ -114,7 +114,7 @@ JsonRouter<Servo_Driver> ServoControllerJsonRouter::router = JsonRouter<Servo_Dr
         target.set(controller.getAngle());
     }},
     {"target", [](Servo_Driver &controller, const JsonVariant target) {
-        target.set(controller.targetAngle);
+        target.set(controller.getTarget());
     }},
     {"tolerance", [](Servo_Driver &controller, const JsonVariant target) {
         target.set(controller.tolerance);

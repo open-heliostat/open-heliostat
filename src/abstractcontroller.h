@@ -1,11 +1,17 @@
 #ifndef ABSTRACTCONTROLLER_H
 #define ABSTRACTCONTROLLER_H
 #include <encoder.h>
+#include <freertos/FreeRTOS.h>
+#include <freertos/semphr.h>
 
 class AbstractController {
 public:
-    AbstractController(Encoder &encoder) : encoder(encoder) {}
-    virtual ~AbstractController() {}
+    AbstractController(Encoder &encoder) : encoder(encoder) {
+        _mutex = xSemaphoreCreateMutex();
+    }
+    virtual ~AbstractController() {
+        vSemaphoreDelete(_mutex);
+    }
 
     // Core control methods
     virtual void run() = 0;
@@ -16,13 +22,17 @@ public:
     Encoder &encoder;
     bool enabled;
     bool hasLimits = false;
-    double targetAngle;
     double tolerance = 0.1;
     double encoderOffset = 0.;
     double error;
     double limitA = 0.;
     double limitB = 360.;
 
+protected:
+    double targetAngle;
+    SemaphoreHandle_t _mutex;
+
+public:
     double mod(double a, double N) {return a - N*floor(a/N);}
     double angularDistance(double a, double b) {
         return mod(a - b + 180., 360.) - 180.;
@@ -42,9 +52,14 @@ public:
         return interval;
     }
     double getTarget() {
-        return targetAngle;
+        double t;
+        xSemaphoreTake(_mutex, portMAX_DELAY);
+        t = targetAngle;
+        xSemaphoreGive(_mutex);
+        return t;
     }
     void setTarget(double angle) {
+        xSemaphoreTake(_mutex, portMAX_DELAY);
         if (hasLimits) {
             double middle = calcMiddle();
             double interval = calcInterval();
@@ -53,18 +68,20 @@ public:
             targetAngle = mod(max(min(t, interval*0.5), -interval*0.5) + middle, 360.);
         }
         else targetAngle = mod(angle, 360.);
+        xSemaphoreGive(_mutex);
     }
     virtual double getAngle(){
         return mod(encoder.getAngle()+encoderOffset, 360.);
     }
     void calcError() {
         double curAngle = getAngle();
+        double t = getTarget();
         if (hasLimits) {
             double middle = calcMiddle();
             double interval = calcInterval();
-            error = mod(targetAngle - middle + 180., 360.) - mod(curAngle - middle + 180., 360.);
+            error = mod(t - middle + 180., 360.) - mod(curAngle - middle + 180., 360.);
         }
-        else error = angularDistance(targetAngle, curAngle);
+        else error = angularDistance(t, curAngle);
     }
     void setEncoderOffset(double offset) {
         double offsetDiff = offset - encoderOffset;

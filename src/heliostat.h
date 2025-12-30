@@ -63,6 +63,10 @@ public:
             reflectCurrentSource();
             lastCommand = now;
         }
+    }
+
+    void runLoop()
+    {
         azimuthController.run();
         elevationController.run();
     }

@@ -84,13 +84,14 @@ struct Servo_Driver : public AbstractController
         }
 
         double dt = prevRunMs == 0 ? 0.0 : (now - prevRunMs) / 1000.0;
+        double localTarget = getTarget();
 
         if (hasLimits) {
             double middle = calcMiddle();
-            error = mod(targetAngle - middle + 180., 360.) - mod(curAngle - middle + 180., 360.);
+            error = mod(localTarget - middle + 180., 360.) - mod(curAngle - middle + 180., 360.);
         }
         else {
-            error = angularDistance(targetAngle, curAngle);
+            error = angularDistance(localTarget, curAngle);
         }
 
         if (dt > 0) {
@@ -124,7 +125,7 @@ struct Servo_Driver : public AbstractController
 
         if (plot && (now - lastPlotMs >= telemetryIntervalMs)) {
             TELEPLOT_SEND("angle", curAngle);
-            TELEPLOT_SEND("target", targetAngle);
+            TELEPLOT_SEND("target", localTarget);
             TELEPLOT_SEND("error", error);
             TELEPLOT_SEND("p_term", pTerm);
             TELEPLOT_SEND("i_term", iTerm);
@@ -172,7 +173,9 @@ struct Servo_Driver : public AbstractController
         encoder.init();
         getAngle();
         if (encoder.hasNewData()) {
+            xSemaphoreTake(_mutex, portMAX_DELAY);
             targetAngle = getAngle();
+            xSemaphoreGive(_mutex);
             run();
         }
     }
@@ -192,7 +195,9 @@ struct Servo_Driver : public AbstractController
         derivative = 0;
         lastError = 0;
         lastRunMs = 0;
+        xSemaphoreTake(_mutex, portMAX_DELAY);
         targetAngle = getAngle();
+        xSemaphoreGive(_mutex);
         mode = MODE_AUTOTUNE;
     }
     void cancelAutoTune() {
@@ -211,7 +216,7 @@ private:
         }
 
         double curAngle = getAngle();
-        double e = angularDistance(targetAngle, curAngle);
+        double e = angularDistance(getTarget(), curAngle);
         autoTunePeakHigh = max(autoTunePeakHigh, e);
         autoTunePeakLow = min(autoTunePeakLow, e);
 

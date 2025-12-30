@@ -23,7 +23,9 @@ public:
     void init() {
         getAngle();
         if (encoder.hasNewData()) {
+            xSemaphoreTake(_mutex, portMAX_DELAY);
             targetAngle =  getAngle();
+            xSemaphoreGive(_mutex);
             run();
         }
     }
@@ -34,7 +36,7 @@ public:
     void run() {
         if (calibrationRunning) runCalibration();
         else if (enabled && millis() - lastPoll >= maxPollInterval) {
-            setAngle(targetAngle);
+            setAngle(getTarget());
             lastPoll = millis();
         }
     }
@@ -63,7 +65,7 @@ public:
     }
     void setAngle(double angle) override {
         setTarget(angle);
-        stepper.setAngle(targetAngle);
+        stepper.setAngle(getTarget());
     }
 private:
     double getCalibratedAngle() {
@@ -104,7 +106,7 @@ private:
                     ESP_LOGI("Calibration", "Goto B");
                 }
             }
-            else setAngle(targetAngle);
+            else setAngle(getTarget());
         }
     }
     uint32_t lastPoll = 0;

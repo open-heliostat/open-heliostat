@@ -101,6 +101,18 @@ ESPNowService espNowService = ESPNowService(
 
 WiFiUDP teleplotUDP;
 
+TaskHandle_t controlTaskHandle = NULL;
+
+void controlTask(void *pvParameters) {
+    const TickType_t xFrequency = pdMS_TO_TICKS(20); // 50Hz
+    TickType_t xLastWakeTime = xTaskGetTickCount();
+
+    while (true) {
+        heliostatController.runLoop();
+        vTaskDelayUntil(&xLastWakeTime, xFrequency);
+    }
+}
+
 void setup()
 {
     // start serial and filesystem
@@ -132,6 +144,16 @@ void setup()
     digitalWrite(MOTEN, HIGH);
     
     // closedLoopControllerService.begin();
+
+    xTaskCreatePinnedToCore(
+        controlTask,
+        "ControlTask",
+        4096,
+        NULL,
+        configMAX_PRIORITIES - 1,
+        &controlTaskHandle,
+        1
+    );
 }
 
 unsigned long lastTick = 0;

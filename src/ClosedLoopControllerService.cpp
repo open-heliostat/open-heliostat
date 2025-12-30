@@ -52,7 +52,7 @@ JsonRouter<ClosedLoopController> ClosedLoopControllerJsonRouter::router = JsonRo
         target.set(controller.getAngle());
     }},
     {"target", [](ClosedLoopController &controller, const JsonVariant target) {
-        target.set(controller.targetAngle);
+        target.set(controller.getTarget());
     }},
     {"tolerance", [](ClosedLoopController &controller, const JsonVariant target) {
         target.set(controller.tolerance);

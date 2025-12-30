@@ -16,7 +16,7 @@ public:
     }
     void init() {
         I2C.begin(_SDA, _SCL);
-        I2C.setClock(100000);
+        I2C.setClock(400000);
         I2C.setTimeOut(10);
     }
     double getAngle() {
