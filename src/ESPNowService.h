@@ -77,7 +77,9 @@ public:
                       this,
                       sveltekit->getFS(),
                       "/config/espnow.json"),
-        StatefulService(event) {}
+        StatefulService(event) {
+            sveltekit->getFeatureService()->addFeature("espnow", true);
+        }
 
     void begin();
     void loop();

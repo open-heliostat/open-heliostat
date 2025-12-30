@@ -18,6 +18,7 @@
 #include <HeliostatService.h>
 #include <ArtNetService.h>
 #include <MovementSequencerService.h>
+#include <RemoteService.h>
 #include <ESPNowService.h>
 #include <pins.h>
 
@@ -85,6 +86,12 @@ GPSStateService gpsStateService =  GPSStateService(
     &gpsneo,
     esp32sveltekit.getFeatureService());
 
+RemotesController remotesController;
+RemoteService remoteService = RemoteService(
+    &server,
+    &esp32sveltekit,
+    remotesController);
+
 ESPNowState espNowState;
 
 ESPNowService espNowService = ESPNowService(
@@ -116,6 +123,7 @@ void setup()
     elSequencerService.begin();
     heliostatService.begin();
     artNetService.begin();
+    remoteService.begin();
     espNowService.begin();
 
     esp32sveltekit.getFeatureService()->addFeature("motors", true);
@@ -162,6 +170,7 @@ void loop()
     prof("elSequencerService", +[](){ elSequencerService.loop(); });
     prof("heliostatService",   +[](){ heliostatService.loop(); });
     prof("artNetService",      +[](){ artNetService.loop(); });
+    prof("remoteService",      +[](){ remoteService.loop(); });
     prof("espNowService",      +[](){ espNowService.loop(); });
 
     unsigned long now = millis();

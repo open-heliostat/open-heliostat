@@ -28,7 +28,7 @@
     let remoteAddresses: { label: string; value: string }[] = [];
 
     async function getRemotes() {
-        return getJsonRest('/rest/spin-seq/remotes', { remotes: [] }).then((data) => {
+        return getJsonRest('/rest/remote', { remotes: [] }).then((data) => {
             remotes = data.remotes;
             console.log("ESPNow Remotes: ", remotes);
             remoteAddresses = remotes
