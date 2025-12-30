@@ -104,7 +104,7 @@ WiFiUDP teleplotUDP;
 TaskHandle_t controlTaskHandle = NULL;
 
 void controlTask(void *pvParameters) {
-    const TickType_t xFrequency = pdMS_TO_TICKS(20); // 50Hz
+    const TickType_t xFrequency = pdMS_TO_TICKS(50); // 20Hz
     TickType_t xLastWakeTime = xTaskGetTickCount();
 
     while (true) {
