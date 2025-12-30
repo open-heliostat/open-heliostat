@@ -44,6 +44,7 @@ public:
         root["enabled"] = true;
         root["invert"] = true;
         root["offset"] = true;
+        root["tolerance"] = true;
         root["P"] = true;
         root["I"] = true;
         root["D"] = true;
