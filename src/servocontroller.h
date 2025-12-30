@@ -44,10 +44,10 @@ struct Servo_Driver : public AbstractController
     double tunedTu = 0.0;
     static constexpr double kPi = 3.14159265358979323846;
     uint32_t lastPlotMs = 0;
-    uint16_t telemetryIntervalMs = 50; // throttle telemetry to avoid UDP saturation
+    uint16_t telemetryIntervalMs = 100; // throttle telemetry to avoid UDP saturation
     uint32_t lastEncoderMs = 0;
     uint16_t encoderTimeoutMs = 200; // ms without encoder data before stopping motor
-    const uint16_t loopWarnThresholdMs = 50; // warn if control loop pauses beyond this
+    const uint16_t loopWarnThresholdMs = 60; // warn if control loop pauses beyond this
     const uint16_t loopWarnCooldownMs = 500; // throttle warnings
     const uint16_t profileWarnCooldownMs = 500; // throttle section profiling logs
     const uint16_t sectionWarnMs = 20; // warn if a section in run() exceeds this
