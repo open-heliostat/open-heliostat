@@ -108,7 +108,12 @@ void controlTask(void *pvParameters) {
     TickType_t xLastWakeTime = xTaskGetTickCount();
 
     while (true) {
+        uint32_t start = micros();
         heliostatController.runLoop();
+        uint32_t end = micros();
+        if (end - start > 10000) { // Warn if > 10ms (50% of budget)
+             Serial.printf("Control loop slow: %lu us\n", end - start);
+        }
         vTaskDelayUntil(&xLastWakeTime, xFrequency);
     }
 }

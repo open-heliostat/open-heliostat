@@ -65,6 +65,13 @@ JsonRouter<Servo_Driver> ServoControllerJsonRouter::router = JsonRouter<Servo_Dr
         }
         else return false;
     }},
+    {"ramp", [](JsonVariant content, Servo_Driver &controller) {
+        if (content.is<double>()) {
+            controller.outputRamp = content.as<double>();
+            return true;
+        }
+        else return false;
+    }},
     {"autotune", [](JsonVariant content, Servo_Driver &controller) {
         if (content.is<JsonObject>()) {
             auto obj = content.as<JsonObject>();
@@ -142,6 +149,9 @@ JsonRouter<Servo_Driver> ServoControllerJsonRouter::router = JsonRouter<Servo_Dr
     }},
     {"S", [](Servo_Driver &controller, const JsonVariant target) {
         target.set(controller.S);
+    }},
+    {"ramp", [](Servo_Driver &controller, const JsonVariant target) {
+        target.set(controller.outputRamp);
     }},
     {"curGain", [](Servo_Driver &controller, const JsonVariant target) {
         target.set(controller.curGain);

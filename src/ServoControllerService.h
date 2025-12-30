@@ -49,6 +49,7 @@ public:
         root["I"] = true;
         root["D"] = true;
         root["S"] = true;
+        root["ramp"] = true;
         root["limits"]["enabled"] = true;
         root["limits"]["begin"] = true;
         root["limits"]["end"] = true;

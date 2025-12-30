@@ -22,11 +22,13 @@ struct Servo_Driver : public AbstractController
     double lastDerivative = 0;
     double integralLimit = 1.0; // keeps integral from pushing output beyond motor limits
     double derivativeFilter = 0.2; // simple low-pass on derivative term
-    uint32_t lastRunMs = 0;
+    uint32_t lastRunUs = 0;
     uint32_t lastLoopWarnMs = 0;
     uint32_t lastProfileWarnMs = 0;
     double lastAngle = 0.0;
     double maxDerivative = 500.0; // deg/s clamp to reduce noise spikes
+    double outputRamp = 0.0; // 0.0 = disabled, >0.0 = max change per second (e.g. 1.0 = full scale/s)
+    double lastOutput = 0.0;
     Mode mode = MODE_PID;
     double autoTuneAmp = 0.25;
     double autoTuneBand = 1.0;
@@ -62,7 +64,7 @@ struct Servo_Driver : public AbstractController
 
         uint32_t now = millis();
         uint32_t tStartUs = micros();
-        uint32_t prevRunMs = lastRunMs;
+        uint32_t prevRunUs = lastRunUs;
 
         bool gotNew = encoder.update();
         uint32_t tAfterEncoderUs = micros();
@@ -83,7 +85,7 @@ struct Servo_Driver : public AbstractController
             return;
         }
 
-        double dt = prevRunMs == 0 ? 0.0 : (now - prevRunMs) / 1000.0;
+        double dt = prevRunUs == 0 ? 0.0 : (tStartUs - prevRunUs) / 1000000.0;
         double localTarget = getTarget();
 
         if (hasLimits) {
@@ -110,6 +112,14 @@ struct Servo_Driver : public AbstractController
         double iTerm = integral * I;
         double dTerm = derivative * D;
         double result = pTerm + iTerm + dTerm;
+
+        if (outputRamp > 0.0 && dt > 0.0) {
+            double maxChange = outputRamp * dt;
+            double change = result - lastOutput;
+            change = max(-maxChange, min(maxChange, change));
+            result = lastOutput + change;
+        }
+
         curGain = min(max(result, -1.0), 1.0);
 
         if (fabs(error) < tolerance) {
@@ -118,6 +128,7 @@ struct Servo_Driver : public AbstractController
             derivative = 0;
         }
 
+        lastOutput = curGain;
         motor.setSpeed(curGain);
         uint32_t tAfterMotorUs = micros();
         lastError = error;
@@ -141,8 +152,8 @@ struct Servo_Driver : public AbstractController
         uint32_t motorUs = tAfterMotorUs - tAfterEncoderUs;
 
         // Merge loop lag warning with profiling numbers for clarity.
-        if (prevRunMs != 0) {
-            uint32_t gap = now - prevRunMs;
+        if (prevRunUs != 0) {
+            uint32_t gap = (tStartUs - prevRunUs) / 1000;
             if (gap > loopWarnThresholdMs && (now - lastLoopWarnMs) > loopWarnCooldownMs) {
                 Serial.printf("Servo loop lag: %lu ms (mode %d) enc=%lu us motor=%lu us total=%lu us\n",
                               (unsigned long)gap, (int)mode,
@@ -159,7 +170,7 @@ struct Servo_Driver : public AbstractController
         }
 
         // Update lastRunMs at the end so gap calculations use the previous timestamp.
-        lastRunMs = now;
+        lastRunUs = tStartUs;
     }
     void setAngle(double angle) override {
         setTarget(angle);
@@ -194,7 +205,7 @@ struct Servo_Driver : public AbstractController
         integral = 0;
         derivative = 0;
         lastError = 0;
-        lastRunMs = 0;
+        lastRunUs = 0;
         xSemaphoreTake(_mutex, portMAX_DELAY);
         targetAngle = getAngle();
         xSemaphoreGive(_mutex);
@@ -249,7 +260,7 @@ private:
                 integral = 0;
                 derivative = 0;
                 curGain = 0;
-                lastRunMs = 0;
+                lastRunUs = 0;
                 return;
             }
         }
