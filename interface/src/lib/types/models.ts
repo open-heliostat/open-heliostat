@@ -281,6 +281,30 @@ export type MovementSequencerState = {
     duration: number;
 };
 
+export type SourceTargetKeyframe = {
+	tMs: number;
+	sourceAz: number;
+	sourceEl: number;
+	targetAz: number;
+	targetEl: number;
+};
+
+export type SourceTargetSequencerState = {
+	frames: SourceTargetKeyframe[];
+	loop: boolean;
+	running: boolean;
+	duration: number;
+};
+
+export type TargetSequencerState = {
+	target: string;
+	framesAz: SequencerKeyframe[];
+	framesEl: SequencerKeyframe[];
+	loop: boolean;
+	running: boolean;
+	duration: number;
+};
+
 export type DCMotorControlState = {
     speed: number;
     duty: number;

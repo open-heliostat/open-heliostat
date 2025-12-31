@@ -18,6 +18,7 @@
 #include <HeliostatService.h>
 #include <ArtNetService.h>
 #include <MovementSequencerService.h>
+#include <TargetSequencerService.h>
 #include <RemoteService.h>
 #include <ESPNowService.h>
 #include <pins.h>
@@ -36,12 +37,12 @@ Encoder encoder2 = Encoder(SDA2, SCL2, Wire1);
 Servo_Driver servo1 = {motor1, encoder1};
 Servo_Driver servo2 = {motor2, encoder2};
 
+SerialGPS gpsneo = SerialGPS(Serial1, GPSRX, GPSTX);
+HeliostatController heliostatController = {servo1, servo2, gpsneo};
+
 MovementSequencer azSequencer = MovementSequencer(servo1);
 MovementSequencer elSequencer = MovementSequencer(servo2);
-
-SerialGPS gpsneo = SerialGPS(Serial1, GPSRX, GPSTX);
-
-HeliostatController heliostatController = {servo1, servo2, gpsneo};
+TargetSequencer targetSequencer = TargetSequencer(heliostatController);
 
 MovementSequencerService azSequencerService = MovementSequencerService(
     &server,
@@ -62,6 +63,16 @@ MovementSequencerService elSequencerService = MovementSequencerService(
     "/rest/heliostat/elevation/sequence",
     "/config/heliostat-el-sequence.json",
     "heliostat-el-sequence");
+
+TargetSequencerService targetSequencerService = TargetSequencerService(
+    &server,
+    esp32sveltekit.getSocket(),
+    esp32sveltekit.getFS(),
+    esp32sveltekit.getSecurityManager(),
+    targetSequencer,
+    "/rest/heliostat/targets/sequence",
+    "/config/heliostat-targets-sequence.json",
+    "heliostat-targets-sequence");
 
 HeliostatService heliostatService = HeliostatService(
     &server,
@@ -138,6 +149,7 @@ void setup()
 
     azSequencerService.begin();
     elSequencerService.begin();
+    targetSequencerService.begin();
     heliostatService.begin();
     artNetService.begin();
     remoteService.begin();
@@ -195,6 +207,7 @@ void loop()
 
     prof("azSequencerService", +[](){ azSequencerService.loop(); });
     prof("elSequencerService", +[](){ elSequencerService.loop(); });
+    prof("targetSequencerService", +[](){ targetSequencerService.loop(); });
     prof("heliostatService",   +[](){ heliostatService.loop(); });
     prof("artNetService",      +[](){ artNetService.loop(); });
     prof("remoteService",      +[](){ remoteService.loop(); });

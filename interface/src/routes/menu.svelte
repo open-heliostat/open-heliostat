@@ -22,6 +22,7 @@
 	import PlugConnected from '~icons/tabler/plug-connected';
 	import GPS from '~icons/tabler/satellite';
 	import Rotation from '~icons/tabler/rotate-dot'
+	import RouteIcon from '~icons/tabler/route'
 	import Status from '~icons/tabler/device-heart-monitor';
 	import { page } from '$app/stores';
 	import { user } from '$lib/stores/user';
@@ -60,6 +61,12 @@
 			title: 'Controllers',
 			icon: Rotation,
 			href: '/controllers',
+			feature: true,
+		},
+		{
+			title: 'Sequencer',
+			icon: RouteIcon,
+			href: '/sequencer',
 			feature: true,
 		},
 		{
