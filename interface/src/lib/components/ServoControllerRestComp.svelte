@@ -28,6 +28,7 @@
         I: 0,
         D: 0,
         S: 0,
+        maxSpeed: 0,
         curGain: 0,
         derivative: 0,
         integral: 0,
@@ -102,6 +103,14 @@
                     step={0.01}
                     onChange={() => postJsonRest(restPath, {target: controllerState.target})}
                 ></Slider>
+                <Slider 
+                    label="Speed" 
+                    bind:value={controllerState.maxSpeed}
+                    min={0} 
+                    max={30} 
+                    step={0.1}
+                    onChange={() => postJsonRest(restPath, {maxSpeed: controllerState.maxSpeed})}
+                ></Slider>
             </GridForm>
             <Collapsible>
                 {#snippet title()}
@@ -165,6 +174,14 @@
                         min={0} 
                         max={1} 
                         step={0.01}
+                        onChange={postControllerState}
+                    ></Slider>
+                    <Slider 
+                        label="Max Speed (deg/s)" 
+                        bind:value={controllerState.maxSpeed}
+                        min={0} 
+                        max={30} 
+                        step={0.1}
                         onChange={postControllerState}
                     ></Slider>
                         <span class="text-lg col-span-full">Autotune</span>

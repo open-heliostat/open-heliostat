@@ -25,7 +25,12 @@ JsonRouter<Servo_Driver> ServoControllerJsonRouter::router = JsonRouter<Servo_Dr
     }},
     {"target", [](JsonVariant content, Servo_Driver &controller) {
         if (content.is<double>()) {
-            controller.setAngle(content.as<double>());
+            double angle = content.as<double>();
+            if (controller.maxSpeed > 0.0) {
+                controller.setAngleWithMaxSpeed(angle, controller.maxSpeed);
+            } else {
+                controller.setAngle(angle);
+            }
             return true;
         }
         else return false;
@@ -61,6 +66,14 @@ JsonRouter<Servo_Driver> ServoControllerJsonRouter::router = JsonRouter<Servo_Dr
     {"S", [](JsonVariant content, Servo_Driver &controller) {
         if (content.is<double>()) {
             controller.S = content.as<double>();
+            return true;
+        }
+        else return false;
+    }},
+    {"maxSpeed", [](JsonVariant content, Servo_Driver &controller) {
+        if (content.is<double>()) {
+            double v = content.as<double>();
+            controller.setMaxSpeed(v > 0.0 ? v : 0.0);
             return true;
         }
         else return false;
@@ -149,6 +162,9 @@ JsonRouter<Servo_Driver> ServoControllerJsonRouter::router = JsonRouter<Servo_Dr
     }},
     {"S", [](Servo_Driver &controller, const JsonVariant target) {
         target.set(controller.S);
+    }},
+    {"maxSpeed", [](Servo_Driver &controller, const JsonVariant target) {
+        target.set(controller.maxSpeed);
     }},
     {"ramp", [](Servo_Driver &controller, const JsonVariant target) {
         target.set(controller.outputRamp);

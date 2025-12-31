@@ -16,6 +16,7 @@ struct Servo_Driver : public AbstractController
     double I = 0;
     double D = 0;
     double S = 0;
+    double maxSpeed = 0.0; // deg/s cap for slew moves (0 = no cap)
     double integral = 0;
     double lastError = 0;
     double curGain = 0;
@@ -53,6 +54,11 @@ struct Servo_Driver : public AbstractController
     const uint16_t loopWarnCooldownMs = 500; // throttle warnings
     const uint16_t profileWarnCooldownMs = 500; // throttle section profiling logs
     const uint16_t sectionWarnMs = 20; // warn if a section in run() exceeds this
+    bool slewActive = false;
+    double slewStartTarget = 0.0;
+    double slewEndTarget = 0.0;
+    uint32_t slewStartMs = 0;
+    uint32_t slewDurationMs = 0;
 	Servo_Driver(Motor_Driver &mot, Encoder &encoder)
         : AbstractController(encoder), motor{mot} {}
     uint8_t getType() const override { return 2; }
@@ -84,6 +90,8 @@ struct Servo_Driver : public AbstractController
             runAutoTune();
             return;
         }
+
+        updateSlewTarget(now);
 
         double dt = prevRunUs == 0 ? 0.0 : (tStartUs - prevRunUs) / 1000000.0;
         double localTarget = getTarget();
@@ -173,11 +181,93 @@ struct Servo_Driver : public AbstractController
         lastRunUs = tStartUs;
     }
     void setAngle(double angle) override {
+        slewActive = false;
         setTarget(angle);
         calcError();
         if (enabled && fabs(error) > tolerance && encoder.hasNewData()) {
             run();
         }
+    }
+
+    // Slews the target toward the requested angle using a linear ramp capped by maxSpeed (deg/s).
+    void setAngleWithMaxSpeed(double angle, double maxSpeed) {
+        double speed = fabs(maxSpeed);
+
+        // Fall back to an immediate set if no usable speed is provided.
+        if (speed <= 1e-6) {
+            slewActive = false;
+            setAngle(angle);
+            return;
+        }
+
+        double startTarget = getTarget();
+        double clampedTarget = clampTargetToLimits(angle);
+        double distance = fabs(angularDistance(clampedTarget, startTarget));
+
+        // Nothing to do if we're already at the requested target.
+        if (distance < 1e-6) {
+            slewActive = false;
+            setAngle(clampedTarget);
+            return;
+        }
+
+        double durationMsF = (distance / speed) * 1000.0;
+        uint32_t durationMs = static_cast<uint32_t>(durationMsF + 0.5);
+        if (durationMs == 0) durationMs = 1;
+
+        slewActive = true;
+        slewStartTarget = startTarget;
+        slewEndTarget = clampedTarget;
+        slewStartMs = millis();
+        slewDurationMs = durationMs;
+        setTarget(slewStartTarget);
+        calcError();
+    }
+
+    // Updates the max speed and, if a slew is active, recomputes timing from the current point along the path.
+    void setMaxSpeed(double speed) {
+        double newSpeed = fabs(speed);
+        maxSpeed = newSpeed;
+
+        if (!slewActive) return;
+
+        uint32_t now = millis();
+
+        // Bring the interpolated target up to "now" before recomputing.
+        double currentTarget = slewEndTarget;
+        if (slewDurationMs != 0) {
+            uint32_t elapsed = now - slewStartMs;
+            if (elapsed >= slewDurationMs) {
+                setTarget(slewEndTarget);
+                slewActive = false;
+                return;
+            }
+            double t = static_cast<double>(elapsed) / static_cast<double>(slewDurationMs);
+            currentTarget = lerp(slewStartTarget, slewEndTarget, t);
+            setTarget(currentTarget);
+        }
+
+        // If speed is zero, finish immediately.
+        if (newSpeed <= 1e-6) {
+            setTarget(slewEndTarget);
+            slewActive = false;
+            return;
+        }
+
+        double remaining = fabs(angularDistance(slewEndTarget, currentTarget));
+        if (remaining < 1e-6) {
+            slewActive = false;
+            setTarget(slewEndTarget);
+            return;
+        }
+
+        double durationMsF = (remaining / newSpeed) * 1000.0;
+        uint32_t durationMs = static_cast<uint32_t>(durationMsF + 0.5);
+        if (durationMs == 0) durationMs = 1;
+
+        slewStartTarget = currentTarget;
+        slewStartMs = now;
+        slewDurationMs = durationMs;
     }
     void init() override {
         motor.init();
@@ -219,6 +309,36 @@ struct Servo_Driver : public AbstractController
     bool isAutoTuneActive() const { return mode == MODE_AUTOTUNE; }
     bool isAutoTuneDone() const { return autoTuneDone; }
 private:
+    double clampTargetToLimits(double angle) {
+        if (hasLimits) {
+            double middle = calcMiddle();
+            double interval = calcInterval();
+            double t = angularDistance(angle, middle);
+            return mod(max(min(t, interval * 0.5), -interval * 0.5) + middle, 360.);
+        }
+        return mod(angle, 360.);
+    }
+
+    void updateSlewTarget(uint32_t nowMs) {
+        if (!slewActive) return;
+        if (slewDurationMs == 0) {
+            setTarget(slewEndTarget);
+            slewActive = false;
+            return;
+        }
+
+        uint32_t elapsed = nowMs - slewStartMs;
+        if (elapsed >= slewDurationMs) {
+            setTarget(slewEndTarget);
+            slewActive = false;
+            return;
+        }
+
+        double t = static_cast<double>(elapsed) / static_cast<double>(slewDurationMs);
+        double nextTarget = lerp(slewStartTarget, slewEndTarget, t);
+        setTarget(nextTarget);
+    }
+
     void runAutoTune() {
         uint32_t now = millis();
         if (now - autoTuneStartMs > autoTuneMaxMs) {

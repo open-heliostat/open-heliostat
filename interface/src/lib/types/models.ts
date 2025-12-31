@@ -253,6 +253,7 @@ export type ServoControllerState = BaseControllerState & {
 	I: number;
 	D: number;
 	S: number;
+	maxSpeed: number;
 	curGain: number;
 	derivative: number;
 	integral: number;
