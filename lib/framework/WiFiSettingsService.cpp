@@ -13,6 +13,8 @@
  **/
 
 #include <WiFiSettingsService.h>
+#include "WiFiScanGuard.h"
+#include <cstring>
 
 WiFiSettingsService::WiFiSettingsService(PsychicHttpServer *server,
                                          FS *fs,
@@ -22,10 +24,14 @@ WiFiSettingsService::WiFiSettingsService(PsychicHttpServer *server,
                                                                 _httpEndpoint(WiFiSettings::read, WiFiSettings::update, this, server, WIFI_SETTINGS_SERVICE_PATH, securityManager,
                                                                               AuthenticationPredicates::IS_ADMIN),
                                                                 _fsPersistence(WiFiSettings::read, WiFiSettings::update, this, fs, WIFI_SETTINGS_FILE),
+                                                                _socket(socket),
                                                                 _lastConnectionAttempt(0),
+                                                                _lastRssiUpdate(0),
                                                                 _delayedReconnectTime(0),
                                                                 _delayedReconnectPending(false),
-                                                                _socket(socket)
+                                                                _stopping(false),
+                                                                _connectInProgress(false),
+                                                                _scanInProgress(false)
 {
     addUpdateHandler([&](const String &originId)
                      { delayedReconnect(); },
@@ -149,6 +155,10 @@ void WiFiSettingsService::manageSTA()
     {
         return;
     }
+    if (_connectInProgress.load() || _scanInProgress.load())
+    {
+        return;
+    }
     else
     {
 #ifdef SERIAL_INFO
@@ -160,6 +170,40 @@ void WiFiSettingsService::manageSTA()
 
 void WiFiSettingsService::connectToWiFi()
 {
+    if (_connectInProgress.exchange(true))
+    {
+        return;
+    }
+
+    bool scanLocked = false;
+    bool scanMutexLocked = false;
+    auto releaseLocks = [&]() {
+        if (scanLocked)
+        {
+            _scanInProgress.store(false);
+        }
+        if (scanMutexLocked)
+        {
+            wifiScanUnlock();
+        }
+        _connectInProgress.store(false);
+    };
+
+    bool expected = false;
+    if (!_scanInProgress.compare_exchange_strong(expected, true))
+    {
+        releaseLocks();
+        return;
+    }
+    scanLocked = true;
+
+    if (!wifiScanLock(pdMS_TO_TICKS(0)))
+    {
+        releaseLocks();
+        return;
+    }
+    scanMutexLocked = true;
+
     // reset availability flag for all stored networks
     for (auto &network : _state.wifiSettings)
     {
@@ -226,6 +270,18 @@ void WiFiSettingsService::connectToWiFi()
             {
                 if (network.available == true)
                 {
+                    // Skip reconnect if we are already on this network/BSSID
+                    if (WiFi.isConnected())
+                    {
+                        uint8_t *currentBssid = WiFi.BSSID();
+                        if (WiFi.SSID() == network.ssid && currentBssid && memcmp(currentBssid, network.bssid, 6) == 0)
+                        {
+                            ESP_LOGI(SVK_TAG, "Already connected to %s, skipping reconnect", network.ssid.c_str());
+                            releaseLocks();
+                            return;
+                        }
+                    }
+
                     ESP_LOGI(SVK_TAG, "Connecting to first available network: %s", network.ssid.c_str());
                     configureNetwork(network);
                     break;
@@ -237,6 +293,17 @@ void WiFiSettingsService::connectToWiFi()
         {
             if (bestNetwork)
             {
+                if (WiFi.isConnected())
+                {
+                    uint8_t *currentBssid = WiFi.BSSID();
+                    if (WiFi.SSID() == bestNetwork->ssid && currentBssid && memcmp(currentBssid, bestNetwork->bssid, 6) == 0)
+                    {
+                        ESP_LOGI(SVK_TAG, "Already connected to strongest network %s, skipping reconnect", bestNetwork->ssid.c_str());
+                        releaseLocks();
+                        return;
+                    }
+                }
+
                 ESP_LOGI(SVK_TAG, "Connecting to strongest network: %s, BSSID: " MACSTR " ", bestNetwork->ssid.c_str(), MAC2STR(bestNetwork->bssid));
                 configureNetwork(*bestNetwork);
             }
@@ -256,9 +323,14 @@ void WiFiSettingsService::connectToWiFi()
             ESP_LOGE(SVK_TAG, "Unknown connection mode, not connecting to any network.");
         }
 
-        // delete scan results
-        WiFi.scanDelete();
+        // delete scan results only if they still exist
+        if (WiFi.scanComplete() >= 0)
+        {
+            WiFi.scanDelete();
+        }
     }
+
+    releaseLocks();
 }
 
 void WiFiSettingsService::configureNetwork(wifi_settings_t &network)

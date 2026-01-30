@@ -13,6 +13,7 @@
  **/
 
 #include <WiFiScanner.h>
+#include "WiFiScanGuard.h"
 
 WiFiScanner::WiFiScanner(PsychicHttpServer *server,
                          SecurityManager *securityManager) : _server(server),
@@ -39,16 +40,32 @@ void WiFiScanner::begin()
 
 esp_err_t WiFiScanner::scanNetworks(PsychicRequest *request)
 {
+    if (!wifiScanLock(pdMS_TO_TICKS(0)))
+    {
+        return request->reply(503);
+    }
+    auto unlock = []() { wifiScanUnlock(); };
+
     if (WiFi.scanComplete() != -1)
     {
-        WiFi.scanDelete();
+        if (WiFi.scanComplete() >= 0)
+        {
+            WiFi.scanDelete();
+        }
         WiFi.scanNetworks(true);
     }
+    unlock();
     return request->reply(202);
 }
 
 esp_err_t WiFiScanner::listNetworks(PsychicRequest *request)
 {
+    if (!wifiScanLock(pdMS_TO_TICKS(50)))
+    {
+        return request->reply(503);
+    }
+    auto unlock = []() { wifiScanUnlock(); };
+
     int numNetworks = WiFi.scanComplete();
     if (numNetworks > -1)
     {
@@ -65,14 +82,18 @@ esp_err_t WiFiScanner::listNetworks(PsychicRequest *request)
             network["encryption_type"] = (uint8_t)WiFi.encryptionType(i);
         }
 
-        return response.send();
+        auto rc = response.send();
+        unlock();
+        return rc;
     }
     else if (numNetworks == -1)
     {
+        unlock();
         return request->reply(202);
     }
     else
     {
+        unlock();
         return scanNetworks(request);
     }
 }

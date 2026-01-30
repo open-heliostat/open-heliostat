@@ -26,6 +26,7 @@
 #include <SecurityManager.h>
 #include <PsychicHttp.h>
 #include <vector>
+#include <atomic>
 
 #ifndef FACTORY_WIFI_SSID
 #define FACTORY_WIFI_SSID ""
@@ -233,6 +234,8 @@ private:
     bool _delayedReconnectPending;
 
     bool _stopping;
+    std::atomic<bool> _connectInProgress{false};
+    std::atomic<bool> _scanInProgress{false};
     void onStationModeDisconnected(WiFiEvent_t event, WiFiEventInfo_t info);
     void onStationModeStop(WiFiEvent_t event, WiFiEventInfo_t info);
 
