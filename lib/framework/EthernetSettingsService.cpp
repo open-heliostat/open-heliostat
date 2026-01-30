@@ -36,6 +36,7 @@ void EthernetSettingsService::initEthernet()
     // make sure the interface is stopped before continuing and initializing
     ETH.end();
     _fsPersistence.readFromFS();
+    _ethReady = false;
     configureNetwork(_state.ethernetSettings);
 }
 
@@ -48,6 +49,11 @@ void EthernetSettingsService::begin()
 void EthernetSettingsService::loop()
 {
     unsigned long currentMillis = millis();
+
+    if (!_ethReady)
+    {
+        return;
+    }
 
     if (!_lastEthernetUpdate || (unsigned long)(currentMillis - _lastEthernetUpdate) >= ETHERNET_EVENT_DELAY)
     {
@@ -87,12 +93,19 @@ void EthernetSettingsService::configureNetwork(ethernet_settings_t &network)
 // (re)start ethernet
 #if CONFIG_IDF_TARGET_ESP32
     // ESP32 chips with built-in ethernet MAC/PHY
-    ETH.begin();
+    _ethReady = ETH.begin();
 #else
     // For SPI based ethernet modules like W5500, ENC28J60 etc.
     SPI.begin(ETH_SPI_SCK, ETH_SPI_MISO, ETH_SPI_MOSI);
-    ETH.begin(ETH_PHY_TYPE, ETH_PHY_ADDR, ETH_PHY_CS, ETH_PHY_IRQ, ETH_PHY_RST, SPI);
+    _ethReady = ETH.begin(ETH_PHY_TYPE, ETH_PHY_ADDR, ETH_PHY_CS, ETH_PHY_IRQ, ETH_PHY_RST, SPI);
 #endif
+    if (!_ethReady)
+    {
+        ESP_LOGE(SVK_TAG, "Ethernet init failed (W5500 absent or miswired); disabling ethernet task until reboot");
+        ETH.end();
+        return;
+    }
+
     // set hostname (again) after (re)starting ethernet due to a bug in the ESP-IDF implementation
     ETH.setHostname(_state.hostname.c_str());
 }

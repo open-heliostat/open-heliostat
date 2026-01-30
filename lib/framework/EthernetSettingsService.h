@@ -119,6 +119,7 @@ private:
     FSPersistence<EthernetSettings> _fsPersistence;
     EventSocket *_socket;
     unsigned long _lastEthernetUpdate;
+    bool _ethReady = false; // tracks whether ETH.begin() succeeded so we can skip work when hardware is absent
 
     void configureNetwork(ethernet_settings_t &network);
     void reconfigureEthernet();

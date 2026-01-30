@@ -21,6 +21,7 @@
 #include <TargetSequencerService.h>
 #include <RemoteService.h>
 #include <ESPNowService.h>
+#include <AccelerometerCalibrationService.h>
 #include <pins.h>
 
 #define SERIAL_BAUD_RATE 115200
@@ -39,6 +40,8 @@ Servo_Driver servo2 = {motor2, encoder2};
 
 SerialGPS gpsneo = SerialGPS(Serial1, GPSRX, GPSTX);
 HeliostatController heliostatController = {servo1, servo2, gpsneo};
+
+ADXL345 accelerometer = ADXL345(Wire, 0x53);
 
 MovementSequencer azSequencer = MovementSequencer(servo1);
 MovementSequencer elSequencer = MovementSequencer(servo2);
@@ -80,6 +83,15 @@ HeliostatService heliostatService = HeliostatService(
     esp32sveltekit.getFS(),
     esp32sveltekit.getSecurityManager(),
     heliostatController);
+
+AccelCalibService accelCalibService = AccelCalibService(
+    &server,
+    esp32sveltekit.getFS(),
+    esp32sveltekit.getSecurityManager(),
+    heliostatController,
+    accelerometer,
+    SDA1,
+    SCL1);
 
 ArtNetService artNetService = ArtNetService(
     &esp32sveltekit,
@@ -151,6 +163,7 @@ void setup()
     elSequencerService.begin();
     targetSequencerService.begin();
     heliostatService.begin();
+    accelCalibService.begin();
     artNetService.begin();
     remoteService.begin();
     espNowService.begin();
@@ -209,6 +222,7 @@ void loop()
     prof("elSequencerService", +[](){ elSequencerService.loop(); });
     prof("targetSequencerService", +[](){ targetSequencerService.loop(); });
     prof("heliostatService",   +[](){ heliostatService.loop(); });
+    prof("accelCalibService", +[](){ accelCalibService.loop(); });
     prof("artNetService",      +[](){ artNetService.loop(); });
     prof("remoteService",      +[](){ remoteService.loop(); });
     prof("espNowService",      +[](){ espNowService.loop(); });

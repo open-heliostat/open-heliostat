@@ -17,6 +17,7 @@
 
 constexpr uint32_t ACCEL_CALIB_MAGIC = 0xC011BEEF;
 constexpr int ACCEL_CALIB_PARAM_COUNT = 10;
+constexpr int ACCEL_ORIENT_PARAM_COUNT = 4;
 
 struct Sample {
     float az;   // rad
@@ -35,6 +36,9 @@ struct CalibData {
 bool checkObservability(const Sample* samples, int count);
 void predictSample(const Sample& sample, const float* params, float out[3]);
 void calibrate(const Sample* data, int count, float* params);
+
+void predictSampleOrientation(const Sample& sample, const float* params, float out[3]);
+bool calibrateOrientation(const Sample* data, int count, float* params, float* outRms = nullptr);
 
 uint32_t computeCalibCRC(const float* params);
 bool loadCalib(const CalibData& stored, float* params);

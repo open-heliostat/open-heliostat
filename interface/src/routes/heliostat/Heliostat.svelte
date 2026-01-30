@@ -17,6 +17,7 @@
 	import { getJsonRest, postJsonRest } from '$lib/stores/rest';
 	import DisableButton from '$lib/components/DisableButton.svelte';
 	import StopButton from '$lib/components/StopButton.svelte';
+	import AccelCalibComp from '$lib/components/AccelCalibComp.svelte';
 
 	const restPath = "/rest/heliostat";
 
@@ -234,3 +235,5 @@
 	</div>
 	{/await}
 </SettingsCard>
+
+<AccelCalibComp restPath="/rest/accelcalib"></AccelCalibComp>
