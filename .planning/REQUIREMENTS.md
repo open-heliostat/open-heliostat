@@ -9,8 +9,8 @@ Requirements for initial release of mount-orientation support.
 
 ### Orientation Model
 
-- [ ] **ORNT-01**: User can set mount orientation with two parameters: tilt magnitude and tilt direction.
-- [ ] **ORNT-02**: System validates orientation values with explicit units, valid bounds, and clear error responses.
+- [x] **ORNT-01**: User can set mount orientation with two parameters: tilt magnitude and tilt direction.
+- [x] **ORNT-02**: System validates orientation values with explicit units, valid bounds, and clear error responses.
 
 ### Control and Geometry
 
@@ -19,8 +19,8 @@ Requirements for initial release of mount-orientation support.
 
 ### Persistence and API
 
-- [ ] **CONF-01**: Orientation configuration persists across reboot in heliostat configuration storage.
-- [ ] **API-01**: REST API supports read/write of orientation fields using existing heliostat service patterns.
+- [x] **CONF-01**: Orientation configuration persists across reboot in heliostat configuration storage.
+- [x] **API-01**: REST API supports read/write of orientation fields using existing heliostat service patterns.
 
 ### Setup UX
 
@@ -52,12 +52,12 @@ Which phases cover which requirements. Populated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| ORNT-01 | Phase 1 | Pending |
-| ORNT-02 | Phase 1 | Pending |
+| ORNT-01 | Phase 1 | Complete |
+| ORNT-02 | Phase 1 | Complete |
 | CTRL-01 | Phase 2 | Pending |
 | CTRL-02 | Phase 2 | Pending |
-| CONF-01 | Phase 1 | Pending |
-| API-01 | Phase 1 | Pending |
+| CONF-01 | Phase 1 | Complete |
+| API-01 | Phase 1 | Complete |
 | UI-01 | Phase 3 | Pending |
 | UI-02 | Phase 3 | Pending |
 

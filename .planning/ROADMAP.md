@@ -12,7 +12,7 @@ This roadmap delivers tilt-aware heliostat tracking by first establishing a comp
 
 Decimal phases appear between their surrounding integers in numeric order.
 
-- [ ] **Phase 1: Orientation Configuration Contract** - Define, validate, persist, and expose mount orientation settings through firmware APIs.
+- [x] **Phase 1: Orientation Configuration Contract** - Define, validate, persist, and expose mount orientation settings through firmware APIs. (completed 2026-03-17)
 - [ ] **Phase 2: Tilt-Aware Control Behavior** - Apply mount-orientation transforms in tracking while preserving level-install compatibility.
 - [ ] **Phase 3: Setup UI and Verification Loop** - Deliver a dedicated setup workflow for configure/apply/test/observe orientation changes.
 
@@ -30,8 +30,8 @@ Decimal phases appear between their surrounding integers in numeric order.
 **Plans**: 2 plans
 
 Plans:
-- [ ] 01-01-PLAN.md - Add mountOrientation API contract, parser/serializer behavior, and validation error path in existing heliostat service flow.
-- [ ] 01-02-PLAN.md - Add orientation persistence wiring and automated contract coverage for clamp, patch, atomic reject, and defaults.
+- [x] 01-01-PLAN.md - Add mountOrientation API contract, parser/serializer behavior, and validation error path in existing heliostat service flow.
+- [x] 01-02-PLAN.md - Add orientation persistence wiring and automated contract coverage for clamp, patch, atomic reject, and defaults.
 
 ### Phase 2: Tilt-Aware Control Behavior
 **Goal**: Tracking outputs remain correct for tilted mounts while preserving current behavior at zero tilt.
@@ -60,6 +60,6 @@ Phases execute in numeric order: 1 -> 2 -> 3
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Orientation Configuration Contract | 0/TBD | Not started | - |
+| 1. Orientation Configuration Contract | 2/2 | Complete   | 2026-03-17 |
 | 2. Tilt-Aware Control Behavior | 0/TBD | Not started | - |
 | 3. Setup UI and Verification Loop | 0/TBD | Not started | - |

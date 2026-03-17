@@ -51,7 +51,7 @@ Each task was committed atomically:
 
 1. **Task 1: Persist mountOrientation and preserve legacy defaults on load** - `396ff26` (feat)
 2. **Task 2: Add orientation contract and persistence automated tests** - `7adbe71` (test)
-3. **Task 3: Run phase-level verification commands and document evidence in summary** - `pending` (chore)
+3. **Task 3: Run phase-level verification commands and document evidence in summary** - `86dfac4` (chore)
 
 _Note: TDD runtime execution is blocked by local Python version for PlatformIO test stage; build-time test compilation evidence is captured below._
 
@@ -96,7 +96,7 @@ _Note: TDD runtime execution is blocked by local Python version for PlatformIO t
 - **Fix:** Recorded runtime gap and captured build-only verification fallback output.
 - **Files modified:** `.planning/phases/01-orientation-configuration-contract/01-02-SUMMARY.md`
 - **Verification:** `--without-uploading --without-testing` passed with compiled test artifacts.
-- **Committed in:** pending task 3 commit
+- **Committed in:** `86dfac4`
 
 ---
 
@@ -113,5 +113,6 @@ None - no external service configuration required.
 - Orientation contract and persistence behavior are wired and compile-verified.
 - For full automated runtime validation before hardware UAT, rerun `platformio test` under Python 3.10+.
 
-## Self-Check: PENDING
-- Commit/file verification appended after plan metadata commit is created.
+## Self-Check: PASSED
+- Verified summary files exist for both Plan 01 and Plan 02.
+- Verified task commit hashes exist: `4e4ef63`, `dbccf34`, `1a9da51`, `396ff26`, `7adbe71`, `86dfac4`.
