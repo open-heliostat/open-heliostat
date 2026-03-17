@@ -10,6 +10,9 @@ void test_save_map_includes_mount_orientation_fields();
 void test_legacy_defaults_remain_level_when_payload_is_empty();
 void test_mount_orientation_is_serialized_with_locked_field_names();
 void test_non_object_mount_orientation_payload_is_rejected();
+void test_zero_tilt_returns_original_vector();
+void test_tilt_azimuth_wrap_360_matches_zero();
+void test_cardinal_downslope_azimuth_produces_directional_shift();
 
 int main(int argc, char **argv)
 {
@@ -24,5 +27,8 @@ int main(int argc, char **argv)
     RUN_TEST(test_legacy_defaults_remain_level_when_payload_is_empty);
     RUN_TEST(test_mount_orientation_is_serialized_with_locked_field_names);
     RUN_TEST(test_non_object_mount_orientation_payload_is_rejected);
+    RUN_TEST(test_zero_tilt_returns_original_vector);
+    RUN_TEST(test_tilt_azimuth_wrap_360_matches_zero);
+    RUN_TEST(test_cardinal_downslope_azimuth_produces_directional_shift);
     return UNITY_END();
 }
