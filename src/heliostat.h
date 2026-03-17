@@ -42,7 +42,13 @@ public:
 
     SphericalCoordinate reflect(SphericalCoordinate source, SphericalCoordinate target) 
     {
-        vec3 bisector = (toCartesian({source.elevation, source.azimuth}) + toCartesian({target.elevation, target.azimuth})) / 2.0;
+        vec3 sourceVec = toCartesian({source.elevation, source.azimuth});
+        vec3 targetVec = toCartesian({target.elevation, target.azimuth});
+
+        sourceVec = applyMountOrientationTransform(sourceVec, tiltDeg, tiltAzimuthDeg);
+        targetVec = applyMountOrientationTransform(targetVec, tiltDeg, tiltAzimuthDeg);
+
+        vec3 bisector = (sourceVec + targetVec) / 2.0;
         vec2 result = toSpherical(bisector);
         // ESP_LOGI("Reflector", "%f %f", result.x, result.y);
         return {result.y, result.x};
