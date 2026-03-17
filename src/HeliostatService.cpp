@@ -5,6 +5,7 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
+#include <algorithm>
 
 namespace {
 
@@ -57,6 +58,10 @@ void formatIso8601(char *buffer, size_t len, const struct tm &tmValue, const cha
              suffix);
 }
 
+double clampRange(double value, double minValue, double maxValue) {
+    return std::max(minValue, std::min(maxValue, value));
+}
+
 }
 
 JsonRouter<HeliostatController> HeliostatControllerJsonRouter::router = JsonRouter<HeliostatController>(
@@ -99,6 +104,36 @@ JsonRouter<HeliostatController> HeliostatControllerJsonRouter::router = JsonRout
             return true;
         }
         return false;
+    }},
+    {"mountOrientation", [&](JsonVariant content, HeliostatController &controller) {
+        if (!content.is<JsonObject>()) {
+            return false;
+        }
+
+        JsonObject obj = content.as<JsonObject>();
+        const bool hasTiltDeg = obj["tiltDeg"].is<JsonVariant>();
+        const bool hasTiltAzimuthDeg = obj["tiltAzimuthDeg"].is<JsonVariant>();
+
+        double nextTiltDeg = controller.tiltDeg;
+        double nextTiltAzimuthDeg = controller.tiltAzimuthDeg;
+
+        if (hasTiltDeg) {
+            if (!obj["tiltDeg"].is<double>()) {
+                return false;
+            }
+            nextTiltDeg = clampRange(obj["tiltDeg"].as<double>(), -90.0, 90.0);
+        }
+
+        if (hasTiltAzimuthDeg) {
+            if (!obj["tiltAzimuthDeg"].is<double>()) {
+                return false;
+            }
+            nextTiltAzimuthDeg = clampRange(obj["tiltAzimuthDeg"].as<double>(), 0.0, 360.0);
+        }
+
+        controller.tiltDeg = nextTiltDeg;
+        controller.tiltAzimuthDeg = nextTiltAzimuthDeg;
+        return true;
     }},
     {"add", [&](JsonVariant content, HeliostatController &controller) {
         JsonObject obj = content.as<JsonObject>();
@@ -183,6 +218,11 @@ JsonRouter<HeliostatController> HeliostatControllerJsonRouter::router = JsonRout
     }},
     {"currentSource", [&](HeliostatController &controller, JsonVariant content)  {
         content.set(controller.currentSource);
+    }},
+    {"mountOrientation", [&](HeliostatController &controller, JsonVariant content) {
+        JsonObject obj = content.to<JsonObject>();
+        obj["tiltDeg"] = controller.tiltDeg;
+        obj["tiltAzimuthDeg"] = controller.tiltAzimuthDeg;
     }},
     {"sunTracker", [&](HeliostatController &controller, JsonVariant content) {
         JsonObject obj = content.to<JsonObject>();
