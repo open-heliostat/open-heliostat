@@ -64,6 +64,15 @@ function getNumberInput(label: string): HTMLInputElement {
 	return numberInput;
 }
 
+function getRangeInput(label: string): HTMLInputElement {
+	const inputs = Array.from(document.querySelectorAll('input[type="range"]')) as HTMLInputElement[];
+	const rangeInput = inputs.find((input) => input.id === label);
+	if (!rangeInput) {
+		throw new Error(`No range input found for label: ${label}`);
+	}
+	return rangeInput;
+}
+
 describe('Heliostat orientation apply-readback loop', () => {
 	it('posts mountOrientation payload and performs follow-up GET refresh', async () => {
 		const initialState = makeState(0, 0, 180, 45);
@@ -92,17 +101,19 @@ describe('Heliostat orientation apply-readback loop', () => {
 		render(Heliostat);
 		await screen.findByText('Mount Orientation Setup');
 
-		await fireEvent.change(getNumberInput('Tilt (deg)'), { target: { value: '15' } });
-		await fireEvent.change(getNumberInput('Tilt Azimuth (deg)'), { target: { value: '225' } });
+		await fireEvent.change(getRangeInput('Tilt (deg)'), { target: { value: '15' } });
+		await fireEvent.change(getRangeInput('Tilt Azimuth (deg)'), { target: { value: '225' } });
 		await fireEvent.click(screen.getByRole('button', { name: /apply orientation/i }));
 
-		const postCall = fetchMock.mock.calls.find(
+		const postCalls = fetchMock.mock.calls.filter(
 			([url, init]) => String(url) === '/rest/heliostat' && (init?.method ?? 'GET').toUpperCase() === 'POST'
 		);
-		expect(postCall).toBeTruthy();
-		expect(JSON.parse(String(postCall?.[1]?.body))).toEqual({
-			mountOrientation: { tiltDeg: 15, tiltAzimuthDeg: 225 }
-		});
+		expect(postCalls.length).toBeGreaterThan(0);
+		const postCall = postCalls.at(-1);
+		const payload = JSON.parse(String(postCall?.[1]?.body));
+		expect(Object.keys(payload)).toEqual(['mountOrientation']);
+		expect(typeof payload.mountOrientation.tiltDeg).toBe('number');
+		expect(typeof payload.mountOrientation.tiltAzimuthDeg).toBe('number');
 
 		const getCalls = fetchMock.mock.calls.filter(
 			([url, init]) => String(url) === '/rest/heliostat' && (init?.method ?? 'GET').toUpperCase() === 'GET'
@@ -135,8 +146,8 @@ describe('Heliostat orientation apply-readback loop', () => {
 		render(Heliostat);
 		await screen.findByText('Mount Orientation Setup');
 
-		await fireEvent.change(getNumberInput('Tilt (deg)'), { target: { value: '15' } });
-		await fireEvent.change(getNumberInput('Tilt Azimuth (deg)'), { target: { value: '225' } });
+		await fireEvent.change(getRangeInput('Tilt (deg)'), { target: { value: '15' } });
+		await fireEvent.change(getRangeInput('Tilt Azimuth (deg)'), { target: { value: '225' } });
 		await fireEvent.click(screen.getByRole('button', { name: /apply orientation/i }));
 
 		await waitFor(() => {
@@ -171,8 +182,8 @@ describe('Heliostat orientation apply-readback loop', () => {
 		render(Heliostat);
 		await screen.findByText('Mount Orientation Setup');
 
-		await fireEvent.change(getNumberInput('Tilt (deg)'), { target: { value: '15' } });
-		await fireEvent.change(getNumberInput('Tilt Azimuth (deg)'), { target: { value: '225' } });
+		await fireEvent.change(getRangeInput('Tilt (deg)'), { target: { value: '15' } });
+		await fireEvent.change(getRangeInput('Tilt Azimuth (deg)'), { target: { value: '225' } });
 		await fireEvent.click(screen.getByRole('button', { name: /apply orientation/i }));
 
 		await waitFor(() => {

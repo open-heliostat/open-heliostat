@@ -73,6 +73,7 @@
 	$: sunTrackerTime = heliostatControllerState?.sunTracker;
 	let orientationDraft: MountOrientation = { ...defaultHeliostatControllerState.mountOrientation };
 	let orientationDirty = false;
+	let orientationApplyStatus = '';
 
 	let selectedEditor = "Sun";
 	let selectedDirection: Direction;
@@ -124,15 +125,20 @@
 			return;
 		}
 
-		await postJsonRest(restPath, {
-			mountOrientation: {
-				tiltDeg: orientationDraft.tiltDeg,
-				tiltAzimuthDeg: orientationDraft.tiltAzimuthDeg
-			}
-		});
+		try {
+			await postJsonRest(restPath, {
+				mountOrientation: {
+					tiltDeg: orientationDraft.tiltDeg,
+					tiltAzimuthDeg: orientationDraft.tiltAzimuthDeg
+				}
+			});
 
-		orientationDirty = false;
-		await getHeliostatControllerState();
+			orientationDirty = false;
+			await getHeliostatControllerState();
+			orientationApplyStatus = 'Orientation applied successfully';
+		} catch (error) {
+			orientationApplyStatus = 'Orientation apply failed';
+		}
 	}
 
 	function syncClientTime() {
@@ -295,6 +301,9 @@
 				Apply Orientation
 			</button>
 		</div>
+		{#if orientationApplyStatus}
+			<div class="text-info text-sm mt-2">{orientationApplyStatus}</div>
+		{/if}
 	</div>
 </SettingsCard>
 
