@@ -7,6 +7,7 @@
     export let onChange = () => {};
     export let hasNumber = true;
     export let disabled = false;
+    export let strictNumberBounds = true;
     // $: value = Math.round(value/step)*step;
 </script>
 
@@ -28,8 +29,8 @@
     {#if hasNumber}
     <input
         type="number"
-        min={min}
-        max={max}
+        min={strictNumberBounds ? min : undefined}
+        max={strictNumberBounds ? max : undefined}
         step={step}
         class="input input-bordered h-8 w-20"
         id={label}

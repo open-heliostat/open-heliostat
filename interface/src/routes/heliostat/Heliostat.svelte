@@ -1,16 +1,10 @@
 <script lang="ts">
-	import { onMount, onDestroy } from 'svelte';
+	import { onMount } from 'svelte';
 	import SettingsCard from '$lib/components/SettingsCard.svelte';
 	import Light from '~icons/tabler/bulb';
 	import Info from '~icons/tabler/info-circle';
-	import Save from '~icons/tabler/device-floppy';
-	import Reload from '~icons/tabler/reload';
-	import { socket } from '$lib/stores/socket';
 	import GridForm from '$lib/components/GridForm.svelte';
 	import Slider from '$lib/components/Slider.svelte';
-	import Checkbox from '$lib/components/Checkbox.svelte';
-	import type { ControllerState } from '$lib/types/models'
-	import ControllerSettings from '../../lib/components/ControllerSettings.svelte';
 	import Select from '$lib/components/Select.svelte';
 	import Text from '$lib/components/Text.svelte';
 	import Button from '$lib/components/Button.svelte';
@@ -27,6 +21,11 @@
 		azimuth: number;
 		elevation: number;
 	}
+
+	type MountOrientation = {
+		tiltDeg: number;
+		tiltAzimuthDeg: number;
+	};
 
 	type HeliostatControllerState = {
 		enabled: boolean;
@@ -46,22 +45,94 @@
 			localIso?: string;
 			tz?: string;
 			offsetMinutes?: number;
-		}
+		};
+		mountOrientation: MountOrientation;
 	}
 
-	let heliostatControllerState : HeliostatControllerState;
+	const defaultHeliostatControllerState: HeliostatControllerState = {
+		enabled: false,
+		currentSource: 'None',
+		currentTarget: 'None',
+		sourcesMap: {
+			Sun: { azimuth: 180, elevation: 45 }
+		},
+		sunTracker: {
+			latitude: 0,
+			longitude: 0,
+			isTimeSet: false,
+			azimuth: 0,
+			elevation: 0
+		},
+		mountOrientation: {
+			tiltDeg: 0,
+			tiltAzimuthDeg: 0
+		}
+	};
+
+	let heliostatControllerState : HeliostatControllerState = { ...defaultHeliostatControllerState };
 	$: sunTrackerTime = heliostatControllerState?.sunTracker;
+	let orientationDraft: MountOrientation = { ...defaultHeliostatControllerState.mountOrientation };
+	let orientationDirty = false;
 
 	let selectedEditor = "Sun";
 	let selectedDirection: Direction;
 	$: selectedDirection = heliostatControllerState?.sourcesMap[selectedEditor];
 
+	function getTiltError(value: number): string {
+		if (value < -90 || value > 90) {
+			return 'Tilt must be between -90 and 90 degrees';
+		}
+		return '';
+	}
+
+	function getTiltAzimuthError(value: number): string {
+		if (value < 0 || value > 360) {
+			return 'Tilt azimuth must be between 0 and 360 degrees';
+		}
+		return '';
+	}
+
+	$: tiltError = getTiltError(orientationDraft.tiltDeg);
+	$: tiltAzimuthError = getTiltAzimuthError(orientationDraft.tiltAzimuthDeg);
+	$: hasOrientationErrors = Boolean(tiltError || tiltAzimuthError);
+	$: canApplyOrientation = orientationDirty && !hasOrientationErrors;
+
+	function hydrateOrientationDraft() {
+		if (orientationDirty) {
+			return;
+		}
+
+		orientationDraft = {
+			tiltDeg: heliostatControllerState.mountOrientation?.tiltDeg ?? 0,
+			tiltAzimuthDeg: heliostatControllerState.mountOrientation?.tiltAzimuthDeg ?? 0
+		};
+	}
+
 	async function getHeliostatControllerState() {
-		return getJsonRest(restPath, heliostatControllerState).then((data)=>{heliostatControllerState=data;console.log(heliostatControllerState)});
+		return getJsonRest(restPath, heliostatControllerState).then((data)=>{
+			heliostatControllerState = data;
+			hydrateOrientationDraft();
+		});
 	}
 
 	async function postHeliostatControllerState() {
 		return postJsonRest(restPath, heliostatControllerState).then((data)=>heliostatControllerState=data);
+	}
+
+	async function applyOrientation() {
+		if (!canApplyOrientation) {
+			return;
+		}
+
+		await postJsonRest(restPath, {
+			mountOrientation: {
+				tiltDeg: orientationDraft.tiltDeg,
+				tiltAzimuthDeg: orientationDraft.tiltAzimuthDeg
+			}
+		});
+
+		orientationDirty = false;
+		await getHeliostatControllerState();
 	}
 
 	function syncClientTime() {
@@ -89,6 +160,10 @@
 			}
 		);
 	}
+
+	onMount(() => {
+		getHeliostatControllerState();
+	});
 
 </script>
 
@@ -177,6 +252,49 @@
 			<StopButton onClick={() => postJsonRest(restPath, {azimuth:{enabled: false, stepper: {control: {stop: {}}}},elevation:{enabled: false, stepper: {control: {stop: {}}}}})}></StopButton>
 		</div>
 		{/await}
+	</div>
+</SettingsCard>
+
+<SettingsCard>
+	{#snippet title()}
+		<span>Mount Orientation Setup</span>
+	{/snippet}
+	<div class="w-full">
+		<GridForm>
+			<Slider
+				label="Tilt (deg)"
+				bind:value={orientationDraft.tiltDeg}
+				min={-90}
+				max={90}
+				step={0.01}
+				strictNumberBounds={false}
+				onChange={() => {
+					orientationDirty = true;
+				}}
+			></Slider>
+			<div class={tiltError ? 'text-error text-sm' : 'text-base-content/70 text-sm'}>
+				Tilt must be between -90 and 90 degrees
+			</div>
+			<Slider
+				label="Tilt Azimuth (deg)"
+				bind:value={orientationDraft.tiltAzimuthDeg}
+				min={0}
+				max={360}
+				step={0.01}
+				strictNumberBounds={false}
+				onChange={() => {
+					orientationDirty = true;
+				}}
+			></Slider>
+			<div class={tiltAzimuthError ? 'text-error text-sm' : 'text-base-content/70 text-sm'}>
+				Tilt azimuth must be between 0 and 360 degrees
+			</div>
+		</GridForm>
+		<div class="flex flex-row justify-end">
+			<button class="btn btn-primary inline-flex items-center" disabled={!canApplyOrientation} on:click={applyOrientation}>
+				Apply Orientation
+			</button>
+		</div>
 	</div>
 </SettingsCard>
 

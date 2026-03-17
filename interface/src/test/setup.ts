@@ -1,3 +1,4 @@
+import { cleanup } from '@testing-library/svelte';
 import { afterEach, beforeEach, vi } from 'vitest';
 
 type MockHeliostatState = {
@@ -102,11 +103,32 @@ function setupFetchMock(): void {
 	});
 }
 
+function applyMockStatePatch(patch: Partial<MockHeliostatState>): void {
+	mockState = {
+		...mockState,
+		...patch,
+		mountOrientation: {
+			...mockState.mountOrientation,
+			...(patch.mountOrientation ?? {})
+		},
+		sunTracker: {
+			...mockState.sunTracker,
+			...(patch.sunTracker ?? {})
+		}
+	};
+}
+
 beforeEach(() => {
 	mockState = clone(baseState);
 	setupFetchMock();
+	Object.defineProperty(globalThis, '__setMockHeliostatState', {
+		value: applyMockStatePatch,
+		writable: true,
+		configurable: true
+	});
 });
 
 afterEach(() => {
+	cleanup();
 	vi.restoreAllMocks();
 });
