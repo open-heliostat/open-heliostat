@@ -97,6 +97,8 @@ public:
 
     double latitude = 0.0;
     double longitude = 0.0;
+    double tiltDeg = 0.0;
+    double tiltAzimuthDeg = 0.0;
     bool coordinatesDirty = false;
 
     void getLocationFromGPS() {
