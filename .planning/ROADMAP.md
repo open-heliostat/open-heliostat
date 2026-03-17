@@ -41,7 +41,11 @@ Plans:
   1. With non-zero orientation configured, tracking applies mount-orientation transform before actuator target computation.
   2. With zero tilt configured, output behavior is equivalent to current level-install operation.
   3. Updating orientation settings changes subsequent tracking targets without requiring firmware restart.
-**Plans**: TBD
+**Plans**: 2 plans
+
+Plans:
+- [ ] 02-01-PLAN.md - Define mount-orientation geometry transform contracts with TDD coverage for zero-tilt equivalence and downslope azimuth semantics.
+- [ ] 02-02-PLAN.md - Integrate orientation transform into heliostat reflection control path with live-state runtime and regression verification.
 
 ### Phase 3: Setup UI and Verification Loop
 **Goal**: Users can configure orientation confidently and verify effect through an explicit setup workflow.
