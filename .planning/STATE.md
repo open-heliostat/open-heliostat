@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: planning
-stopped_at: Phase 2 context gathered
-last_updated: "2026-03-17T22:57:51.947Z"
-last_activity: 2026-03-17 - Phase 1 plans executed and summaries generated
+stopped_at: Completed 02-02-PLAN.md
+last_updated: "2026-03-17T23:17:40.318Z"
+last_activity: 2026-03-18 - Phase 2 plans executed and summaries generated
 progress:
   total_phases: 3
-  completed_phases: 1
-  total_plans: 2
-  completed_plans: 2
+  completed_phases: 2
+  total_plans: 4
+  completed_plans: 4
   percent: 100
 ---
 
@@ -21,37 +21,40 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-17)
 
 **Core value:** A user can install the heliostat on a non-level surface and still get correct, stable solar tracking without manual compensation hacks.
-**Current focus:** Phase 2 - Tilt-Aware Control Behavior
+**Current focus:** Phase 3 - Setup UI and Verification Loop
 
 ## Current Position
 
-Phase: 2 of 3 (Tilt-Aware Control Behavior)
+Phase: 3 of 3 (Setup UI and Verification Loop)
 Plan: 0 of TBD in current phase
 Status: Ready to plan
-Last activity: 2026-03-17 - Phase 1 plans executed and summaries generated
+Last activity: 2026-03-18 - Phase 2 plans executed and summaries generated
 
 Progress: [██████████] 100%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 0
-- Average duration: 52 min
-- Total execution time: 1.7 hours
+- Total plans completed: 4
+- Average duration: 41 min
+- Total execution time: 2.7 hours
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
 | 01 | 2 | 104 min | 52 min |
+| 02 | 2 | 60 min | 30 min |
 
 **Recent Trend:**
-- Last 5 plans: 01-01 (58m), 01-02 (46m)
+- Last 5 plans: 01-01 (58m), 01-02 (46m), 02-01 (32m), 02-02 (28m)
 - Trend: Improving
 
 *Updated after each plan completion*
 | Phase 01 P01 | 58 | 3 tasks | 3 files |
 | Phase 01 P02 | 46 | 3 tasks | 8 files |
+| Phase 02 P01 | 32 | 3 tasks | 5 files |
+| Phase 02 P02 | 28 | 3 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -66,6 +69,9 @@ Recent decisions affecting current work:
 - [Phase 01]: Clamp orientation ranges while rejecting invalid payload shapes/types atomically.
 - [Phase 01]: Extract orientation contract behavior into shared helper functions to prevent parser/test drift.
 - [Phase 01]: Use build-only PlatformIO test fallback when local Python runtime blocks pio test execution stage.
+- [Phase 02]: Added applyMountOrientationTransform with zero-tilt identity and azimuth-wrap-safe semantics.
+- [Phase 02]: Applied mount transform to source and target vectors inside reflect() before bisector math.
+- [Phase 02]: Kept service/API/persistence contracts unchanged while consuming live tilt state each reflect call.
 
 ### Pending Todos
 
@@ -77,6 +83,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-17T22:57:51.945Z
-Stopped at: Phase 2 context gathered
-Resume file: .planning/phases/02-tilt-aware-control-behavior/02-CONTEXT.md
+Last session: 2026-03-17T23:17:40.317Z
+Stopped at: Completed 02-02-PLAN.md
+Resume file: None

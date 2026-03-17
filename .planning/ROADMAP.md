@@ -13,7 +13,7 @@ This roadmap delivers tilt-aware heliostat tracking by first establishing a comp
 Decimal phases appear between their surrounding integers in numeric order.
 
 - [x] **Phase 1: Orientation Configuration Contract** - Define, validate, persist, and expose mount orientation settings through firmware APIs. (completed 2026-03-17)
-- [ ] **Phase 2: Tilt-Aware Control Behavior** - Apply mount-orientation transforms in tracking while preserving level-install compatibility.
+- [x] **Phase 2: Tilt-Aware Control Behavior** - Apply mount-orientation transforms in tracking while preserving level-install compatibility. (completed 2026-03-18)
 - [ ] **Phase 3: Setup UI and Verification Loop** - Deliver a dedicated setup workflow for configure/apply/test/observe orientation changes.
 
 ## Phase Details
@@ -44,8 +44,8 @@ Plans:
 **Plans**: 2 plans
 
 Plans:
-- [ ] 02-01-PLAN.md - Define mount-orientation geometry transform contracts with TDD coverage for zero-tilt equivalence and downslope azimuth semantics.
-- [ ] 02-02-PLAN.md - Integrate orientation transform into heliostat reflection control path with live-state runtime and regression verification.
+- [x] 02-01-PLAN.md - Define mount-orientation geometry transform contracts with TDD coverage for zero-tilt equivalence and downslope azimuth semantics.
+- [x] 02-02-PLAN.md - Integrate orientation transform into heliostat reflection control path with live-state runtime and regression verification.
 
 ### Phase 3: Setup UI and Verification Loop
 **Goal**: Users can configure orientation confidently and verify effect through an explicit setup workflow.
@@ -65,5 +65,5 @@ Phases execute in numeric order: 1 -> 2 -> 3
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Orientation Configuration Contract | 2/2 | Complete   | 2026-03-17 |
-| 2. Tilt-Aware Control Behavior | 0/TBD | Not started | - |
+| 2. Tilt-Aware Control Behavior | 2/2 | Complete | 2026-03-18 |
 | 3. Setup UI and Verification Loop | 0/TBD | Not started | - |

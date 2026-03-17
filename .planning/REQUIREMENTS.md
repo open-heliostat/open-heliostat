@@ -14,8 +14,8 @@ Requirements for initial release of mount-orientation support.
 
 ### Control and Geometry
 
-- [ ] **CTRL-01**: Tracking logic applies mount-orientation transform before actuator target computation.
-- [ ] **CTRL-02**: Zero-tilt configuration produces behavior equivalent to current level-install operation.
+- [x] **CTRL-01**: Tracking logic applies mount-orientation transform before actuator target computation.
+- [x] **CTRL-02**: Zero-tilt configuration produces behavior equivalent to current level-install operation.
 
 ### Persistence and API
 
@@ -54,8 +54,8 @@ Which phases cover which requirements. Populated during roadmap creation.
 |-------------|-------|--------|
 | ORNT-01 | Phase 1 | Complete |
 | ORNT-02 | Phase 1 | Complete |
-| CTRL-01 | Phase 2 | Pending |
-| CTRL-02 | Phase 2 | Pending |
+| CTRL-01 | Phase 2 | Complete |
+| CTRL-02 | Phase 2 | Complete |
 | CONF-01 | Phase 1 | Complete |
 | API-01 | Phase 1 | Complete |
 | UI-01 | Phase 3 | Pending |
