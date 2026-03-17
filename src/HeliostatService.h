@@ -38,8 +38,13 @@ public:
     static StateUpdateResult update(JsonObject &root, HeliostatController &state, const String &originId)
     {
         (void)originId;
-        if (router.parse(root, state) && JsonSaveManager::needsToSave(root, getSaveMap(state))) return StateUpdateResult::CHANGED;
-        else return StateUpdateResult::UNCHANGED;
+        if (!router.parse(root, state)) {
+            return StateUpdateResult::ERROR;
+        }
+        if (JsonSaveManager::needsToSave(root, getSaveMap(state))) {
+            return StateUpdateResult::CHANGED;
+        }
+        return StateUpdateResult::UNCHANGED;
     }
     static const void getSaveMap(JsonObject &root, HeliostatController &state)
     {
