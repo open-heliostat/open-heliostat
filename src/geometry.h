@@ -208,6 +208,7 @@ struct ObjectDirection : vec2 {
 
 vec3 toCartesian(vec2 spherical);
 vec2 toSpherical(vec3 cartesian);
+vec3 applyMountOrientationTransform(vec3 input, double tiltDeg, double tiltAzimuthDeg);
 
 struct SphericalCoordinate
 {

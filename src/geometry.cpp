@@ -1,4 +1,16 @@
 #include <geometry.h>
+
+namespace {
+double normalizeAzimuthDeg(double azimuthDeg)
+{
+    double normalized = fmod(azimuthDeg, 360.0);
+    if (normalized < 0.0) {
+        normalized += 360.0;
+    }
+    return normalized;
+}
+}
+
 vec2 vec3::toSpherical() {
     double theta = atan2(sqrt(x*x + y*y), z);
     double phi = atan2(y, x);
@@ -25,4 +37,20 @@ vec2 toSpherical(vec3 cartesian) {
     spherical.x = 90. - spherical.x; // Convert from theta/phi to elevation/azimuth
     // double phi = atan2(sqrt(cartesian.x * cartesian.x + cartesian.y * cartesian.y), cartesian.z); // Elevation angle
     return spherical;
+}
+
+vec3 applyMountOrientationTransform(vec3 input, double tiltDeg, double tiltAzimuthDeg)
+{
+    if (fabs(tiltDeg) < 1e-12) {
+        return input;
+    }
+
+    double azimuthRad = degToRad(normalizeAzimuthDeg(tiltAzimuthDeg));
+    double tiltRad = degToRad(tiltDeg);
+
+    vec3 transformed = input;
+    transformed.rotZ(-azimuthRad);
+    transformed.rotY(-tiltRad);
+    transformed.rotZ(azimuthRad);
+    return transformed;
 }
