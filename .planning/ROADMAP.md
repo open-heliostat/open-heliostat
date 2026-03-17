@@ -27,7 +27,11 @@ Decimal phases appear between their surrounding integers in numeric order.
   2. Invalid orientation inputs return clear validation errors with explicit bounds/units.
   3. Orientation settings persist across reboot and reload correctly from heliostat configuration storage.
   4. Existing devices without orientation settings default to level-mount behavior without manual migration.
-**Plans**: TBD
+**Plans**: 2 plans
+
+Plans:
+- [ ] 01-01-PLAN.md - Add mountOrientation API contract, parser/serializer behavior, and validation error path in existing heliostat service flow.
+- [ ] 01-02-PLAN.md - Add orientation persistence wiring and automated contract coverage for clamp, patch, atomic reject, and defaults.
 
 ### Phase 2: Tilt-Aware Control Behavior
 **Goal**: Tracking outputs remain correct for tilted mounts while preserving current behavior at zero tilt.
