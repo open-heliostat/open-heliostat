@@ -24,8 +24,8 @@ Requirements for initial release of mount-orientation support.
 
 ### Setup UX
 
-- [ ] **UI-01**: User can configure orientation in UI through a dedicated setup section with validation.
-- [ ] **UI-02**: User can run an apply-test-observe loop in setup to verify orientation changes.
+- [x] **UI-01**: User can configure orientation in UI through a dedicated setup section with validation.
+- [x] **UI-02**: User can run an apply-test-observe loop in setup to verify orientation changes.
 
 ## v2 Requirements
 
@@ -58,8 +58,8 @@ Which phases cover which requirements. Populated during roadmap creation.
 | CTRL-02 | Phase 2 | Complete |
 | CONF-01 | Phase 1 | Complete |
 | API-01 | Phase 1 | Complete |
-| UI-01 | Phase 3 | Pending |
-| UI-02 | Phase 3 | Pending |
+| UI-01 | Phase 3 | Complete |
+| UI-02 | Phase 3 | Complete |
 
 **Coverage:**
 - v1 requirements: 8 total

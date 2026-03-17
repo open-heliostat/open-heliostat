@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: planning
-stopped_at: Phase 3 context gathered
-last_updated: "2026-03-17T23:22:23.709Z"
+stopped_at: Completed 03-02-PLAN.md
+last_updated: "2026-03-17T23:44:17.454Z"
 last_activity: 2026-03-18 - Phase 2 plans executed and summaries generated
 progress:
   total_phases: 3
-  completed_phases: 2
-  total_plans: 4
-  completed_plans: 4
+  completed_phases: 3
+  total_plans: 6
+  completed_plans: 6
   percent: 100
 ---
 
@@ -55,6 +55,8 @@ Progress: [██████████] 100%
 | Phase 01 P02 | 46 | 3 tasks | 8 files |
 | Phase 02 P01 | 32 | 3 tasks | 5 files |
 | Phase 02 P02 | 28 | 3 tasks | 2 files |
+| Phase 03 P01 | 70 | 2 tasks | 8 files |
+| Phase 03 P02 | 35 | 2 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -72,6 +74,8 @@ Recent decisions affecting current work:
 - [Phase 02]: Added applyMountOrientationTransform with zero-tilt identity and azimuth-wrap-safe semantics.
 - [Phase 02]: Applied mount transform to source and target vectors inside reflect() before bisector math.
 - [Phase 02]: Kept service/API/persistence contracts unchanged while consuming live tilt state each reflect call.
+- [Phase 03]: Use Vitest/jsdom route tests with deterministic /rest/heliostat mocks for UI validation.
+- [Phase 03]: Keep apply loop local to Heliostat route: POST mountOrientation then GET read-back with inline status.
 
 ### Pending Todos
 
@@ -83,6 +87,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-17T23:22:23.707Z
-Stopped at: Phase 3 context gathered
-Resume file: .planning/phases/03-setup-ui-and-verification-loop/03-CONTEXT.md
+Last session: 2026-03-17T23:44:17.453Z
+Stopped at: Completed 03-02-PLAN.md
+Resume file: None

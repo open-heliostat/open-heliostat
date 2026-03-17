@@ -14,7 +14,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 
 - [x] **Phase 1: Orientation Configuration Contract** - Define, validate, persist, and expose mount orientation settings through firmware APIs. (completed 2026-03-17)
 - [x] **Phase 2: Tilt-Aware Control Behavior** - Apply mount-orientation transforms in tracking while preserving level-install compatibility. (completed 2026-03-18)
-- [ ] **Phase 3: Setup UI and Verification Loop** - Deliver a dedicated setup workflow for configure/apply/test/observe orientation changes.
+- [x] **Phase 3: Setup UI and Verification Loop** - Deliver a dedicated setup workflow for configure/apply/test/observe orientation changes. (completed 2026-03-18)
 
 ## Phase Details
 
@@ -55,7 +55,11 @@ Plans:
   1. User can configure tilt magnitude and tilt direction in a dedicated setup section with inline validation.
   2. User can apply orientation changes and immediately observe updated behavior for verification.
   3. User can complete an apply-test-observe loop and confirm values remain available after refresh/reload.
-**Plans**: TBD
+**Plans**: 2 plans
+
+Plans:
+- [x] 03-01-PLAN.md - Add route-level UI test harness and dedicated mount orientation setup section with inline validation.
+- [x] 03-02-PLAN.md - Implement apply-readback-observe-refresh verification loop with automated coverage and hardware checkpoint.
 
 ## Progress
 
@@ -66,4 +70,4 @@ Phases execute in numeric order: 1 -> 2 -> 3
 |-------|----------------|--------|-----------|
 | 1. Orientation Configuration Contract | 2/2 | Complete   | 2026-03-17 |
 | 2. Tilt-Aware Control Behavior | 2/2 | Complete | 2026-03-18 |
-| 3. Setup UI and Verification Loop | 0/TBD | Not started | - |
+| 3. Setup UI and Verification Loop | 2/2 | Complete   | 2026-03-18 |
