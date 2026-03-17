@@ -13,6 +13,9 @@ void test_non_object_mount_orientation_payload_is_rejected();
 void test_zero_tilt_returns_original_vector();
 void test_tilt_azimuth_wrap_360_matches_zero();
 void test_cardinal_downslope_azimuth_produces_directional_shift();
+void test_reflect_changes_when_non_zero_orientation_is_applied();
+void test_reflect_zero_tilt_matches_legacy_math();
+void test_reflect_consumes_live_tilt_state_between_calls();
 
 int main(int argc, char **argv)
 {
@@ -30,5 +33,8 @@ int main(int argc, char **argv)
     RUN_TEST(test_zero_tilt_returns_original_vector);
     RUN_TEST(test_tilt_azimuth_wrap_360_matches_zero);
     RUN_TEST(test_cardinal_downslope_azimuth_produces_directional_shift);
+    RUN_TEST(test_reflect_changes_when_non_zero_orientation_is_applied);
+    RUN_TEST(test_reflect_zero_tilt_matches_legacy_math);
+    RUN_TEST(test_reflect_consumes_live_tilt_state_between_calls);
     return UNITY_END();
 }

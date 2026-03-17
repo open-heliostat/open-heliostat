@@ -8,6 +8,7 @@
 #include <TimeLib.h>
 #include <time.h>
 #include <cmath>
+#include <map>
 
 using DirectionsMap = std::map<String, SphericalCoordinate>;
 
