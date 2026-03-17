@@ -7,6 +7,7 @@
 #include <lib/JsonStateRouter.h>
 #include <ClosedLoopControllerService.h>
 #include <ServoControllerService.h>
+#include <orientation_contract.h>
 
 #include <heliostat.h>
 
@@ -69,6 +70,7 @@ public:
         root["sourcesMap"] = true;
         root["sunTracker"]["latitude"] = true;
         root["sunTracker"]["longitude"] = true;
+        OrientationContract::addMountOrientationSaveMap(root);
     }
     static const JsonDocument getSaveMap(HeliostatController &state)
     {
