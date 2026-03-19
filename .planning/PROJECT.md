@@ -2,11 +2,23 @@
 
 ## What This Is
 
-Open Heliostat is ESP32 firmware plus a web UI for controlling and configuring a heliostat. The project already supports sun tracking, motor control, sequencing, and remote configuration for level-mounted installations. This milestone adds orientation-aware tracking so the device can operate accurately when the mount plane is tilted relative to ground.
+Open Heliostat is ESP32 firmware plus a web UI for controlling and configuring a heliostat. v1.0 now supports orientation-aware operation for non-level installations, including firmware contract support, tilt-aware control behavior, and a dedicated setup workflow for configure/apply/verify. The product remains focused on practical commissioning and reliable tracking in real-world mounting conditions.
 
 ## Core Value
 
 A user can install the heliostat on a non-level surface and still get correct, stable solar tracking without manual compensation hacks.
+
+## Current State
+
+- **Shipped version:** v1.0 MVP (2026-03-19)
+- **Status:** Milestone complete and archived in `.planning/milestones/`
+- **Scope delivered:** Orientation contract, control integration, and setup UI verification loop
+
+## Next Milestone Goals
+
+- Improve setup productivity with a guided orientation workflow.
+- Add stronger in-product verification signals (residual/error visibility).
+- Strengthen test/runtime environment consistency for repeatable CI and local verification.
 
 ## Requirements
 
@@ -15,13 +27,16 @@ A user can install the heliostat on a non-level surface and still get correct, s
 - ✓ Device-hosted web UI and REST/event APIs for control/configuration — existing
 - ✓ Sun tracking and heliostat control loop on ESP32 hardware — existing
 - ✓ Persistent configuration and feature services in firmware — existing
+- ✓ Mount orientation model with tilt magnitude and tilt direction — v1.0
+- ✓ Tilt-aware tracking/control behavior with zero-tilt compatibility — v1.0
+- ✓ Orientation setup UI with apply/readback verification loop — v1.0
 
 ### Active
 
-- [ ] Add mount-orientation model using two parameters: tilt magnitude and tilt direction
-- [ ] Apply mount-orientation transform in tracking/control math so pointing remains correct when tilted (for example 45 degrees)
-- [ ] Expose mount-orientation settings in UI/API with persistence and safe defaults
-- [ ] Preserve existing behavior for level installations (default compatibility)
+- [ ] Guided orientation setup wizard for faster commissioning
+- [ ] Residual/error indicators to quantify setup quality during verification
+- [ ] Profile save/load flow for repeated deployment scenarios
+- [ ] Stabilize automated runtime test execution across local and CI environments
 
 ### Out of Scope
 
@@ -30,7 +45,7 @@ A user can install the heliostat on a non-level surface and still get correct, s
 
 ## Context
 
-The codebase is a brownfield ESP32 project with modular service-oriented firmware (`src/*Service.*`) and a static SvelteKit UI in `interface/`. Current tracking assumptions are based on level installation and existing offset controls do not represent mount plane tilt directionality. The requested feature needs explicit orientation modeling because one scalar tilt value is insufficient; both tilt amount and azimuth direction are required.
+The codebase is a brownfield ESP32 project with modular service-oriented firmware (`src/*Service.*`) and a static SvelteKit UI in `interface/`. v1.0 established a two-parameter orientation contract, integrated transform-aware control logic, and delivered UI setup/apply verification flows. Remaining work centers on setup productivity, richer operator feedback, and hardening validation workflows.
 
 ## Constraints
 
@@ -42,9 +57,10 @@ The codebase is a brownfield ESP32 project with modular service-oriented firmwar
 
 | Decision | Rationale | Outcome |
 |----------|-----------|---------|
-| Represent mount orientation as two angles (tilt magnitude + tilt direction) | Single tilt parameter cannot disambiguate orientation in 3D | — Pending |
-| User enters orientation via new UI/API configuration fields | Matches existing operational model and keeps setup explicit | — Pending |
-| Default orientation is level mount | Keeps backward compatibility for current installs | — Pending |
+| Represent mount orientation as two angles (tilt magnitude + tilt direction) | Single tilt parameter cannot disambiguate orientation in 3D | ✓ Good |
+| User enters orientation via new UI/API configuration fields | Matches existing operational model and keeps setup explicit | ✓ Good |
+| Default orientation is level mount | Keeps backward compatibility for current installs | ✓ Good |
+| Apply/readback UI loop instead of implicit auto-save edits | Commissioning clarity and verifiable operator intent | ✓ Good |
 
 ---
-*Last updated: 2026-03-17 after initialization*
+*Last updated: 2026-03-19 after v1.0 milestone*
