@@ -1,5 +1,5 @@
-import { render, screen, waitFor } from '@testing-library/svelte';
 import { describe, expect, it } from 'vitest';
+import { render, screen, waitFor } from '@testing-library/svelte';
 
 import Heliostat from './Heliostat.svelte';
 

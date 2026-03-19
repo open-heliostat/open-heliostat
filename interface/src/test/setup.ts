@@ -1,5 +1,6 @@
-import { cleanup } from '@testing-library/svelte';
 import { afterEach, beforeEach, vi } from 'vitest';
+
+import { cleanup } from '@testing-library/svelte';
 
 type MockHeliostatState = {
 	enabled: boolean;

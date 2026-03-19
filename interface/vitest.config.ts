@@ -1,7 +1,7 @@
-import { svelte } from '@sveltejs/vite-plugin-svelte';
 import Icons from 'unplugin-icons/vite';
-import path from 'node:path';
 import { defineConfig } from 'vitest/config';
+import path from 'node:path';
+import { svelte } from '@sveltejs/vite-plugin-svelte';
 
 export default defineConfig({
 	plugins: [
