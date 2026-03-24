@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
+	import { onDestroy, onMount } from 'svelte';
 	import SettingsCard from '$lib/components/SettingsCard.svelte';
 	import Light from '~icons/tabler/bulb';
 	import Info from '~icons/tabler/info-circle';
@@ -25,6 +25,29 @@
 	type MountOrientation = {
 		tiltDeg: number;
 		tiltAzimuthDeg: number;
+	};
+
+	type MountOrientationResolveState = {
+		running: boolean;
+		useLimits: boolean;
+		hasResult: boolean;
+		observabilityOk: boolean;
+		rms: number;
+		completedPoses: number;
+		totalPoses: number;
+		settleMs: number;
+		samplesPerPose: number;
+		status: string;
+		failureReason: string;
+		result: {
+			tiltDeg: number;
+			tiltAzimuthDeg: number;
+			gravityX: number;
+			gravityY: number;
+			gravityZ: number;
+			sensorRollDeg: number;
+			sensorPitchDeg: number;
+		};
 	};
 
 	type HeliostatControllerState = {
@@ -74,6 +97,29 @@
 	let orientationDraft: MountOrientation = { ...defaultHeliostatControllerState.mountOrientation };
 	let orientationDirty = false;
 	let orientationApplyStatus = '';
+	let orientationResolvePollId: ReturnType<typeof setInterval> | undefined;
+	let orientationResolveState: MountOrientationResolveState = {
+		running: false,
+		useLimits: true,
+		hasResult: false,
+		observabilityOk: false,
+		rms: 0,
+		completedPoses: 0,
+		totalPoses: 12,
+		settleMs: 900,
+		samplesPerPose: 10,
+		status: 'idle',
+		failureReason: '',
+		result: {
+			tiltDeg: 0,
+			tiltAzimuthDeg: 0,
+			gravityX: 0,
+			gravityY: 0,
+			gravityZ: 1,
+			sensorRollDeg: 0,
+			sensorPitchDeg: 0
+		}
+	};
 
 	let selectedEditor = "Sun";
 	let selectedDirection: Direction;
@@ -116,6 +162,14 @@
 		});
 	}
 
+	async function refreshOrientationResolveState() {
+		orientationResolveState = await getJsonRest('/rest/heliostat/orientation-resolve', orientationResolveState);
+		if (!orientationResolveState.running && orientationResolvePollId) {
+			clearInterval(orientationResolvePollId);
+			orientationResolvePollId = undefined;
+		}
+	}
+
 	async function postHeliostatControllerState() {
 		return postJsonRest(restPath, heliostatControllerState).then((data)=>heliostatControllerState=data);
 	}
@@ -139,6 +193,39 @@
 		} catch (error) {
 			orientationApplyStatus = 'Orientation apply failed';
 		}
+	}
+
+	async function startOrientationResolve() {
+		await postJsonRest('/rest/heliostat/orientation-resolve', { running: true });
+		await refreshOrientationResolveState();
+		if (!orientationResolvePollId) {
+			orientationResolvePollId = setInterval(refreshOrientationResolveState, 1000);
+		}
+	}
+
+	async function stopOrientationResolve() {
+		await postJsonRest('/rest/heliostat/orientation-resolve', { running: false });
+		await refreshOrientationResolveState();
+	}
+
+	async function applyResolvedOrientation() {
+		await postJsonRest('/rest/heliostat/orientation-resolve', { apply: true });
+		await refreshOrientationResolveState();
+		orientationDirty = false;
+		await getHeliostatControllerState();
+	}
+
+	function useResolvedOrientationDraft() {
+		if (!orientationResolveState.hasResult) {
+			return;
+		}
+
+		orientationDraft = {
+			tiltDeg: orientationResolveState.result.tiltDeg,
+			tiltAzimuthDeg: orientationResolveState.result.tiltAzimuthDeg
+		};
+		orientationDirty = true;
+		orientationApplyStatus = 'Resolved orientation copied to draft';
 	}
 
 	function syncClientTime() {
@@ -169,6 +256,13 @@
 
 	onMount(() => {
 		getHeliostatControllerState();
+		refreshOrientationResolveState();
+	});
+
+	onDestroy(() => {
+		if (orientationResolvePollId) {
+			clearInterval(orientationResolvePollId);
+		}
 	});
 
 </script>
@@ -304,6 +398,50 @@
 		{#if orientationApplyStatus}
 			<div class="text-info text-sm mt-2">{orientationApplyStatus}</div>
 		{/if}
+		<div class="alert alert-info mt-4 shadow">
+			<span>
+				Auto-resolve moves the heliostat through a short guided sequence, estimates installation tilt from gravity, and keeps encoder calibration separate.
+			</span>
+		</div>
+		<div class="mt-4 grid gap-4 md:grid-cols-2">
+			<div class="stats shadow">
+				<div class="stat">
+					<div class="stat-title">Resolve Status</div>
+					<div class="stat-value text-lg">{orientationResolveState.status}</div>
+					<div class="stat-desc">
+						{orientationResolveState.completedPoses}/{orientationResolveState.totalPoses} poses, RMS {orientationResolveState.rms?.toFixed?.(3) ?? '—'}
+					</div>
+				</div>
+			</div>
+			<div class="stats shadow">
+				<div class="stat">
+					<div class="stat-title">Resolved Orientation</div>
+					<div class="stat-value text-lg">
+						{orientationResolveState.result?.tiltDeg?.toFixed?.(2) ?? '—'}°
+					</div>
+					<div class="stat-desc">
+						Azimuth {orientationResolveState.result?.tiltAzimuthDeg?.toFixed?.(2) ?? '—'}°
+					</div>
+				</div>
+			</div>
+		</div>
+		{#if orientationResolveState.failureReason}
+			<div class="text-error text-sm mt-3">{orientationResolveState.failureReason}</div>
+		{/if}
+		<div class="mt-4 flex flex-row flex-wrap gap-2">
+			<button class="btn btn-secondary" disabled={orientationResolveState.running} on:click={startOrientationResolve}>
+				Auto-Resolve Orientation
+			</button>
+			<button class="btn btn-outline" disabled={!orientationResolveState.running} on:click={stopOrientationResolve}>
+				Stop Resolve
+			</button>
+			<button class="btn" disabled={!orientationResolveState.hasResult} on:click={useResolvedOrientationDraft}>
+				Use Result In Draft
+			</button>
+			<button class="btn btn-success" disabled={!orientationResolveState.hasResult} on:click={applyResolvedOrientation}>
+				Apply Resolved Orientation
+			</button>
+		</div>
 	</div>
 </SettingsCard>
 

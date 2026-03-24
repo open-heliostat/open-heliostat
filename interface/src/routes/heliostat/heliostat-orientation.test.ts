@@ -12,6 +12,7 @@ describe('Heliostat mount orientation setup', () => {
 		});
 		expect(screen.getByText('Heliostat Control')).toBeTruthy();
 		expect(screen.getByText('Sun Tracker')).toBeTruthy();
+		expect(screen.getByRole('button', { name: /auto-resolve orientation/i })).toBeTruthy();
 	});
 
 	it('shows inline validation when tiltDeg is outside [-90, 90]', async () => {

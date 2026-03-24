@@ -16,9 +16,12 @@
 using JsonStateRouting::JsonRouter;
 using JsonStateRouting::JsonSaveManager;
 
+class MountOrientationResolveService;
+
 class HeliostatControllerJsonRouter
 {
 public:
+    static void setMountOrientationResolveService(MountOrientationResolveService *service);
     static bool route(JsonVariant content, HeliostatController &controller)
     {
         return router.route(content, controller);
@@ -83,6 +86,9 @@ public:
     static bool updateDirectionsMap(JsonVariant content, DirectionsMap &map);
     static void readDirectionsMap(DirectionsMap map, JsonObject &object);
     static JsonRouter<HeliostatController> router;
+
+private:
+    static MountOrientationResolveService *mountOrientationResolveService;
 };
 
 class HeliostatService : public StatefulService<HeliostatController&>

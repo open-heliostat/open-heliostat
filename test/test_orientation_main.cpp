@@ -16,6 +16,10 @@ void test_cardinal_downslope_azimuth_produces_directional_shift();
 void test_reflect_changes_when_non_zero_orientation_is_applied();
 void test_reflect_zero_tilt_matches_legacy_math();
 void test_reflect_consumes_live_tilt_state_between_calls();
+void test_mount_orientation_estimate_recovers_level_mount();
+void test_mount_orientation_estimate_recovers_known_tilt();
+void test_mount_orientation_estimate_recovers_level_mount_with_sensor_mount_offset();
+void test_mount_orientation_observability_rejects_narrow_motion();
 
 int main(int argc, char **argv)
 {
@@ -36,5 +40,9 @@ int main(int argc, char **argv)
     RUN_TEST(test_reflect_changes_when_non_zero_orientation_is_applied);
     RUN_TEST(test_reflect_zero_tilt_matches_legacy_math);
     RUN_TEST(test_reflect_consumes_live_tilt_state_between_calls);
+    RUN_TEST(test_mount_orientation_estimate_recovers_level_mount);
+    RUN_TEST(test_mount_orientation_estimate_recovers_known_tilt);
+    RUN_TEST(test_mount_orientation_estimate_recovers_level_mount_with_sensor_mount_offset);
+    RUN_TEST(test_mount_orientation_observability_rejects_narrow_motion);
     return UNITY_END();
 }

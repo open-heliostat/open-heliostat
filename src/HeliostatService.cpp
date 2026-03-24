@@ -1,4 +1,5 @@
 #include <HeliostatService.h>
+#include <MountOrientationResolveService.h>
 #include <orientation_contract.h>
 #include "TimeLib.h"
 #include <time.h>
@@ -60,6 +61,13 @@ void formatIso8601(char *buffer, size_t len, const struct tm &tmValue, const cha
 
 }
 
+MountOrientationResolveService *HeliostatControllerJsonRouter::mountOrientationResolveService = nullptr;
+
+void HeliostatControllerJsonRouter::setMountOrientationResolveService(MountOrientationResolveService *service)
+{
+    mountOrientationResolveService = service;
+}
+
 JsonRouter<HeliostatController> HeliostatControllerJsonRouter::router = JsonRouter<HeliostatController>(
 {
     {"azimuth", [&](JsonVariant content, HeliostatController &controller) {
@@ -103,6 +111,14 @@ JsonRouter<HeliostatController> HeliostatControllerJsonRouter::router = JsonRout
     }},
     {"mountOrientation", [&](JsonVariant content, HeliostatController &controller) {
         return OrientationContract::applyMountOrientationPatch(content, controller.tiltDeg, controller.tiltAzimuthDeg);
+    }},
+    {"orientation-resolve", [&](JsonVariant content, HeliostatController &controller) {
+        (void)controller;
+        if (!mountOrientationResolveService || !content.is<JsonObject>()) {
+            return false;
+        }
+        JsonObject obj = content.as<JsonObject>();
+        return mountOrientationResolveService->updateState(obj, "heliostat") != StateUpdateResult::ERROR;
     }},
     {"add", [&](JsonVariant content, HeliostatController &controller) {
         JsonObject obj = content.as<JsonObject>();
@@ -191,6 +207,14 @@ JsonRouter<HeliostatController> HeliostatControllerJsonRouter::router = JsonRout
     {"mountOrientation", [&](HeliostatController &controller, JsonVariant content) {
         JsonObject obj = content.to<JsonObject>();
         OrientationContract::writeMountOrientation(obj, controller.tiltDeg, controller.tiltAzimuthDeg);
+    }},
+    {"orientation-resolve", [&](HeliostatController &controller, JsonVariant content) {
+        (void)controller;
+        if (!mountOrientationResolveService || !content.is<JsonObject>()) {
+            return;
+        }
+        JsonObject obj = content.to<JsonObject>();
+        mountOrientationResolveService->readState(obj);
     }},
     {"sunTracker", [&](HeliostatController &controller, JsonVariant content) {
         JsonObject obj = content.to<JsonObject>();

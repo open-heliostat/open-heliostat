@@ -22,6 +22,7 @@
 #include <RemoteService.h>
 #include <ESPNowService.h>
 #include <AccelerometerCalibrationService.h>
+#include <MountOrientationResolveService.h>
 #include <pins.h>
 
 #define SERIAL_BAUD_RATE 115200
@@ -93,6 +94,11 @@ AccelCalibService accelCalibService = AccelCalibService(
     SDA1,
     SCL1);
 
+MountOrientationResolveService mountOrientationResolveService = MountOrientationResolveService(
+    heliostatService,
+    heliostatController,
+    accelerometer);
+
 ArtNetService artNetService = ArtNetService(
     &esp32sveltekit,
     &heliostatController);
@@ -162,8 +168,9 @@ void setup()
     azSequencerService.begin();
     elSequencerService.begin();
     targetSequencerService.begin();
-    heliostatService.begin();
     accelCalibService.begin();
+    HeliostatControllerJsonRouter::setMountOrientationResolveService(&mountOrientationResolveService);
+    heliostatService.begin();
     artNetService.begin();
     remoteService.begin();
     espNowService.begin();
@@ -223,6 +230,7 @@ void loop()
     prof("targetSequencerService", +[](){ targetSequencerService.loop(); });
     prof("heliostatService",   +[](){ heliostatService.loop(); });
     prof("accelCalibService", +[](){ accelCalibService.loop(); });
+    prof("mountOrientationResolveService", +[](){ mountOrientationResolveService.loop(); });
     prof("artNetService",      +[](){ artNetService.loop(); });
     prof("remoteService",      +[](){ remoteService.loop(); });
     prof("espNowService",      +[](){ espNowService.loop(); });

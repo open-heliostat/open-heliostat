@@ -21,6 +21,7 @@ import sys
 import gzip
 import mimetypes
 import glob
+import re
 from datetime import datetime
 
 # Import shared prebuild utilities
@@ -41,7 +42,11 @@ interface_dir = project_dir + "/interface"
 output_file = project_dir + "/lib/framework/WWWData.h"
 source_www_dir = interface_dir + "/src"
 build_dir = interface_dir + "/build"
+svelte_output_dir = interface_dir + "/.svelte-kit/output"
 filesystem_dir = project_dir + "/data/www"
+
+TEXT_ASSET_SUFFIXES = {".html", ".js", ".css", ".json", ".webmanifest", ".txt", ".xml"}
+REFERENCE_PATTERN = re.compile(r'''["'(](\/(?:_app\/[^"')?#]+|favicon\.png|manifest\.json))["')]''')
 
 
 def find_latest_timestamp_for_app():
@@ -51,7 +56,7 @@ def find_latest_timestamp_for_app():
 
 
 def should_regenerate_output_file():
-    if not flag_exists("EMBED_WWW") or not exists(output_file):
+    if not flag_exists("EMBED_WWW") or not exists(output_file) or not exists(build_dir):
         return True
     last_source_change = find_latest_timestamp_for_app()
     last_build = getmtime(output_file)
@@ -90,6 +95,12 @@ def build_webapp():
     package_manager = get_package_manager()
     print(f"Building interface with {package_manager}")
     os.chdir(interface_dir)
+    if exists(build_dir):
+        print("Cleaning interface build directory")
+        rmtree(build_dir)
+    if exists(svelte_output_dir):
+        print("Cleaning SvelteKit output directory")
+        rmtree(svelte_output_dir)
     env.Execute(f"{package_manager} install")
     env.Execute(f"{package_manager} run build")
     os.chdir("..")
@@ -103,16 +114,62 @@ def embed_webapp():
     add_app_to_filesystem()
 
 
+def collect_reachable_build_files():
+    build_path = Path(build_dir)
+    root_candidates = [
+        "index.html",
+        "manifest.json",
+        "favicon.png",
+        "_app/env.js",
+        "_app/version.json",
+    ]
+
+    pending = [Path(candidate) for candidate in root_candidates if (build_path / candidate).is_file()]
+    discovered = set()
+
+    while pending:
+        relative_path = pending.pop()
+        if relative_path in discovered:
+            continue
+
+        absolute_path = build_path / relative_path
+        if not absolute_path.is_file():
+            continue
+
+        discovered.add(relative_path)
+
+        if absolute_path.suffix not in TEXT_ASSET_SUFFIXES:
+            continue
+
+        try:
+            content = absolute_path.read_text(encoding="utf-8")
+        except UnicodeDecodeError:
+            content = absolute_path.read_text(encoding="utf-8", errors="ignore")
+
+        for match in REFERENCE_PATTERN.findall(content):
+            referenced = Path(match.lstrip("/"))
+            if (build_path / referenced).is_file() and referenced not in discovered:
+                pending.append(referenced)
+
+    if discovered:
+        return sorted(discovered)
+
+    return sorted(path.relative_to(build_path) for path in build_path.rglob("*.*") if path.is_file())
+
+
 def build_progmem():
     mimetypes.init()
+    asset_paths = collect_reachable_build_files()
+    print(f"Embedding {len(asset_paths)} reachable interface assets")
     with open(output_file, "w") as progmem:
         progmem.write("#include <functional>\n")
         progmem.write("#include <Arduino.h>\n")
 
         assetMap = {}
 
-        for idx, path in enumerate(Path(build_dir).rglob("*.*")):
-            asset_path = path.relative_to(build_dir).as_posix()
+        for idx, relative_path in enumerate(asset_paths):
+            path = Path(build_dir) / relative_path
+            asset_path = relative_path.as_posix()
             asset_mime = (
                 mimetypes.guess_type(asset_path)[0] or "application/octet-stream"
             )

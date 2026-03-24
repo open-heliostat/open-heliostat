@@ -21,6 +21,29 @@ type MockHeliostatState = {
 	};
 };
 
+type MockOrientationResolveState = {
+	running: boolean;
+	useLimits: boolean;
+	hasResult: boolean;
+	observabilityOk: boolean;
+	rms: number;
+	completedPoses: number;
+	totalPoses: number;
+	settleMs: number;
+	samplesPerPose: number;
+	status: string;
+	failureReason: string;
+	result: {
+		tiltDeg: number;
+		tiltAzimuthDeg: number;
+		gravityX: number;
+		gravityY: number;
+		gravityZ: number;
+		sensorRollDeg: number;
+		sensorPitchDeg: number;
+	};
+};
+
 const baseState: MockHeliostatState = {
 	enabled: true,
 	currentSource: 'Sun',
@@ -46,6 +69,31 @@ const baseState: MockHeliostatState = {
 };
 
 let mockState: MockHeliostatState = JSON.parse(JSON.stringify(baseState));
+
+const baseOrientationResolveState: MockOrientationResolveState = {
+	running: false,
+	useLimits: true,
+	hasResult: false,
+	observabilityOk: false,
+	rms: 0,
+	completedPoses: 0,
+	totalPoses: 12,
+	settleMs: 900,
+	samplesPerPose: 10,
+	status: 'idle',
+	failureReason: '',
+	result: {
+		tiltDeg: 0,
+		tiltAzimuthDeg: 0,
+		gravityX: 0,
+		gravityY: 0,
+		gravityZ: 1,
+		sensorRollDeg: 0,
+		sensorPitchDeg: 0
+	}
+};
+
+let mockOrientationResolveState: MockOrientationResolveState = JSON.parse(JSON.stringify(baseOrientationResolveState));
 
 function clone<T>(value: T): T {
 	return JSON.parse(JSON.stringify(value));
@@ -90,6 +138,41 @@ function setupFetchMock(): void {
 			return response(mockState);
 		}
 
+		if (url === '/rest/heliostat/orientation-resolve' && method === 'GET') {
+			return response(mockOrientationResolveState);
+		}
+
+		if (url === '/rest/heliostat/orientation-resolve' && method === 'POST') {
+			const body = init?.body ? JSON.parse(String(init.body)) : {};
+			if (body.running === true) {
+				mockOrientationResolveState = {
+					...mockOrientationResolveState,
+					running: true,
+					status: 'moving',
+					failureReason: '',
+					completedPoses: 0
+				};
+			}
+			if (body.running === false) {
+				mockOrientationResolveState = {
+					...mockOrientationResolveState,
+					running: false,
+					status: 'cancelled'
+				};
+			}
+			if (body.apply === true && mockOrientationResolveState.hasResult) {
+				mockState.mountOrientation = {
+					tiltDeg: mockOrientationResolveState.result.tiltDeg,
+					tiltAzimuthDeg: mockOrientationResolveState.result.tiltAzimuthDeg
+				};
+				mockOrientationResolveState = {
+					...mockOrientationResolveState,
+					status: 'applied'
+				};
+			}
+			return response(mockOrientationResolveState);
+		}
+
 		if (url.endsWith('/sunTracker') && method === 'POST') {
 			return response(mockState);
 		}
@@ -119,11 +202,28 @@ function applyMockStatePatch(patch: Partial<MockHeliostatState>): void {
 	};
 }
 
+function applyMockOrientationResolvePatch(patch: Partial<MockOrientationResolveState>): void {
+	mockOrientationResolveState = {
+		...mockOrientationResolveState,
+		...patch,
+		result: {
+			...mockOrientationResolveState.result,
+			...(patch.result ?? {})
+		}
+	};
+}
+
 beforeEach(() => {
 	mockState = clone(baseState);
+	mockOrientationResolveState = clone(baseOrientationResolveState);
 	setupFetchMock();
 	Object.defineProperty(globalThis, '__setMockHeliostatState', {
 		value: applyMockStatePatch,
+		writable: true,
+		configurable: true
+	});
+	Object.defineProperty(globalThis, '__setMockOrientationResolveState', {
+		value: applyMockOrientationResolvePatch,
 		writable: true,
 		configurable: true
 	});
